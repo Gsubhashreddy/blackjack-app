@@ -152,16 +152,13 @@ input[type='range'] {
   border: 1px solid var(--border);
   background: #111827;
   color: var(--text);
+  min-width: 0;
+  flex: 1;
 }
 
 .count-answer-control {
   display: flex;
   gap: 8px;
-}
-
-.count-answer-input {
-  min-width: 0;
-  flex: 1;
 }
 
 .sign-toggle {
