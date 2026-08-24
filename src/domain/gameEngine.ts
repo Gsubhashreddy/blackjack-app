@@ -24,13 +24,21 @@ export type DealTarget =
   | { type: 'player'; seatIndex: number; handId: string }
   | { type: 'dealer' };
 
-export interface RoundEvent {
+export interface CardRoundEvent {
   kind: 'deal' | 'reveal';
   target: DealTarget;
   card: Card;
   /** Whether this card is visible to the learner (and thus counts) at this event. */
   visible: boolean;
 }
+
+export interface SplitRoundEvent {
+  kind: 'split';
+  target: { type: 'player'; seatIndex: number; handId: string };
+  hands: [{ id: string; card: Card }, { id: string; card: Card }];
+}
+
+export type RoundEvent = CardRoundEvent | SplitRoundEvent;
 
 export interface RoundOutput {
   events: RoundEvent[];
@@ -124,6 +132,14 @@ function playSeat(
           doubled: false,
           status: 'active',
         };
+        events.push({
+          kind: 'split',
+          target: { type: 'player', seatIndex, handId: hand.id },
+          hands: [
+            { id: handA.id, card: c1 },
+            { id: handB.id, card: c2 },
+          ],
+        });
         drawTo(handA);
         drawTo(handB);
         resolveHand(handA);

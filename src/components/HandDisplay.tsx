@@ -4,7 +4,7 @@ import { PlayingCard } from './PlayingCard';
 
 export interface HandDisplayProps {
   hand: TableHand;
-  label: string;
+  label?: string;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -22,7 +22,7 @@ export function HandDisplay({ hand, label }: HandDisplayProps) {
 
   return (
     <div className="hand" data-status={hand.status}>
-      <div className="hand-label">{label}</div>
+      {label && <div className="hand-label">{label}</div>}
       <div className="hand-cards">
         {hand.cards.map((c, i) => (
           <PlayingCard

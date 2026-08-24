@@ -35,6 +35,10 @@ export function CountPrompt({ visible, feedback, onSubmit, onContinue }: CountPr
     onSubmit(parsed);
   }
 
+  function toggleSign() {
+    setValue((current) => (current.startsWith('-') ? current.slice(1) : `-${current}`));
+  }
+
   return (
     <div className="modal-overlay" role="presentation">
       <div
@@ -48,16 +52,30 @@ export function CountPrompt({ visible, feedback, onSubmit, onContinue }: CountPr
           <form onSubmit={handleSubmit}>
             <label className="field" htmlFor="running-count-input">
               <span>Your answer</span>
-              <input
-                id="running-count-input"
-                ref={inputRef}
-                type="number"
-                inputMode="numeric"
-                pattern="-?[0-9]*"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                autoComplete="off"
-              />
+              <div className="count-answer-control">
+                <input
+                  id="running-count-input"
+                  ref={inputRef}
+                  className="count-answer-input"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="-?[0-9]*"
+                  value={value}
+                  onChange={(e) => {
+                    if (/^-?[0-9]*$/.test(e.target.value)) setValue(e.target.value);
+                  }}
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  className="secondary-button sign-toggle"
+                  aria-label="Toggle sign"
+                  onClick={toggleSign}
+                  disabled={value === ''}
+                >
+                  +/−
+                </button>
+              </div>
             </label>
             <button type="submit" className="primary-button">
               Submit
