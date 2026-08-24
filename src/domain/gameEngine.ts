@@ -228,12 +228,15 @@ export function playRound(shoe: Shoe, seatCount: number): RoundOutput {
 
   if (!dealerHasBlackjack) {
     revealHole();
-    let dealerEval = evaluateHand(dealerCards);
-    while (!dealerEval.busted && (dealerEval.total < 17 || (dealerEval.total === 17 && dealerEval.soft))) {
-      const card = shoe.draw();
-      dealerCards.push(card);
-      events.push({ kind: 'deal', target: { type: 'dealer' }, card, visible: true });
-      dealerEval = evaluateHand(dealerCards);
+    const allPlayerHandsBusted = seats.flat().every((hand) => hand.status === 'bust');
+    if (!allPlayerHandsBusted) {
+      let dealerEval = evaluateHand(dealerCards);
+      while (!dealerEval.busted && (dealerEval.total < 17 || (dealerEval.total === 17 && dealerEval.soft))) {
+        const card = shoe.draw();
+        dealerCards.push(card);
+        events.push({ kind: 'deal', target: { type: 'dealer' }, card, visible: true });
+        dealerEval = evaluateHand(dealerCards);
+      }
     }
   }
 
