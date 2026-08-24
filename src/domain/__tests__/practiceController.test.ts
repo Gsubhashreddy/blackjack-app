@@ -9,6 +9,7 @@ function settings(overrides: Partial<RunningCountSettings> = {}): RunningCountSe
     speed: 10, // fastest delay so fake-timer advancement is small
     askEveryRounds: 1,
     showTableDuringPrompt: true,
+    showTableWhilePaused: false,
     ...overrides,
   };
 }

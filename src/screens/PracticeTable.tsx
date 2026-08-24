@@ -20,6 +20,11 @@ function seatLabel(seatIndex: number, hand: { id: string }, hasMultipleHands: bo
 export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
   const { snapshot, controller } = usePracticeController(settings);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showTableSettings, setShowTableSettings] = useState(false);
+  const [tableVisibility, setTableVisibility] = useState({
+    showTableWhilePaused: settings.showTableWhilePaused,
+    showTableDuringPrompt: settings.showTableDuringPrompt,
+  });
 
   useEffect(() => {
     if (snapshot?.phase === 'summary' && snapshot.summary) {
@@ -42,17 +47,30 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
 
   const isPaused = snapshot.phase === 'paused';
   const showPrompt = snapshot.phase === 'awaiting-count' || snapshot.phase === 'answered';
-  const hideTableBehindPrompt = showPrompt && !settings.showTableDuringPrompt;
+  const hideTableWhilePaused = isPaused && !tableVisibility.showTableWhilePaused;
+  const hideTableBehindPrompt = showPrompt && !tableVisibility.showTableDuringPrompt;
 
   return (
     <main className="screen practice-screen">
       <div className="session-progress" aria-live="polite">
-        <span>Round {snapshot.roundsCompleted + (snapshot.phase === 'dealing' ? 1 : 0)}</span>
-        <span>Cards dealt: {snapshot.visibleCardsDealt}</span>
-        <span>Shoe: {Math.round(snapshot.shoeProgress * 100)}%</span>
+        <div className="session-progress-details">
+          <span>Round {snapshot.roundsCompleted + (snapshot.phase === 'dealing' ? 1 : 0)}</span>
+          <span>Cards dealt: {snapshot.visibleCardsDealt}</span>
+          <span>Shoe: {Math.round(snapshot.shoeProgress * 100)}%</span>
+        </div>
+        <button
+          type="button"
+          className="settings-button"
+          aria-label="Table visibility settings"
+          aria-expanded={showTableSettings}
+          onClick={() => setShowTableSettings(true)}
+          disabled={showPrompt}
+        >
+          <span aria-hidden="true">⚙</span>
+        </button>
       </div>
 
-      {isPaused ? (
+      {hideTableWhilePaused ? (
         <div className="paused-panel" role="status">
           <p>Session paused. Table hidden.</p>
         </div>
@@ -93,6 +111,37 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
           End Session
         </button>
       </div>
+
+      {showTableSettings && (
+        <div className="modal-overlay" role="presentation">
+          <div className="modal table-settings" role="dialog" aria-modal="true" aria-labelledby="table-settings-title">
+            <h2 id="table-settings-title">Table visibility</h2>
+            <label className="field field-toggle">
+              <span>Show table while paused</span>
+              <input
+                type="checkbox"
+                checked={tableVisibility.showTableWhilePaused}
+                onChange={(e) =>
+                  setTableVisibility((current) => ({ ...current, showTableWhilePaused: e.target.checked }))
+                }
+              />
+            </label>
+            <label className="field field-toggle">
+              <span>Show table during count prompt</span>
+              <input
+                type="checkbox"
+                checked={tableVisibility.showTableDuringPrompt}
+                onChange={(e) =>
+                  setTableVisibility((current) => ({ ...current, showTableDuringPrompt: e.target.checked }))
+                }
+              />
+            </label>
+            <button type="button" className="primary-button" onClick={() => setShowTableSettings(false)}>
+              Done
+            </button>
+          </div>
+        </div>
+      )}
 
       <CountPrompt
         visible={showPrompt}

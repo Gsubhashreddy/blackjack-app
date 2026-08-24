@@ -8,6 +8,7 @@ export interface RunningCountSettings {
   speed: number; // 1-10
   askEveryRounds: number; // 1-10
   showTableDuringPrompt: boolean;
+  showTableWhilePaused: boolean;
 }
 
 export const DEFAULT_SETTINGS: RunningCountSettings = {
@@ -16,6 +17,7 @@ export const DEFAULT_SETTINGS: RunningCountSettings = {
   speed: 5,
   askEveryRounds: 3,
   showTableDuringPrompt: true,
+  showTableWhilePaused: false,
 };
 
 /**

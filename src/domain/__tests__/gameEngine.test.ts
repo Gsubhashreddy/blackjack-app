@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Shoe } from '../shoe';
 import { playRound } from '../gameEngine';
 import { evaluateHand } from '../hand';
-import { hiLoValue } from '../cards';
+import { hiLoValue, type Card, type Rank } from '../cards';
 
 function newShoe(deckCount: 2 | 4 | 6 | 8 = 6, seed = 1) {
   let s = seed;
@@ -12,6 +12,10 @@ function newShoe(deckCount: 2 | 4 | 6 | 8 = 6, seed = 1) {
     return s / 2147483648;
   };
   return new Shoe({ deckCount, rng, penetration: 0.75 });
+}
+
+function card(id: string, rank: Rank): Card {
+  return { id, rank, suit: 'spades' };
 }
 
 describe('playRound', () => {
@@ -79,6 +83,32 @@ describe('playRound', () => {
     const reveals = result.events.filter((e) => e.kind === 'reveal');
     expect(reveals).toHaveLength(1);
     expect(reveals[0].card.id).toBe(dealerDeals[1].card.id);
+  });
+
+  it('does not draw dealer cards when every player hand has busted', () => {
+    const shoe = newShoe();
+    const cards = [
+      card('p1-1', '10'),
+      card('p2-1', '10'),
+      card('dealer-up', '2'),
+      card('p1-2', '2'),
+      card('p2-2', '2'),
+      card('dealer-hole', '4'),
+      card('p1-hit', 'K'),
+      card('p2-hit', 'Q'),
+    ];
+    const draw = vi.spyOn(shoe, 'draw').mockImplementation(() => {
+      const next = cards.shift();
+      if (!next) throw new Error('Dealer drew after all player hands busted');
+      return next;
+    });
+
+    const result = playRound(shoe, 2);
+
+    expect(result.seats.flat().every((hand) => hand.status === 'bust')).toBe(true);
+    expect(result.dealer.cards).toHaveLength(2);
+    expect(result.events.filter((event) => event.kind === 'reveal')).toHaveLength(1);
+    expect(draw).toHaveBeenCalledTimes(8);
   });
 
   it('running count computed only from visible events matches manual Hi-Lo of all events after full reveal', () => {

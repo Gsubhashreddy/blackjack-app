@@ -238,10 +238,30 @@ input[type='checkbox'] {
 .session-progress {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 8px;
   font-size: 0.85rem;
   color: var(--text-dim);
+}
+
+.session-progress-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
   flex-wrap: wrap;
+  flex: 1;
+}
+
+.settings-button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #111827;
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
 .table-felt {
@@ -301,6 +321,7 @@ input[type='checkbox'] {
 }
 
 .playing-card {
+  position: relative;
   width: 46px;
   height: 66px;
   border-radius: 6px;
@@ -315,6 +336,13 @@ input[type='checkbox'] {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(0, 0, 0, 0.15);
   flex-shrink: 0;
+}
+
+.card-rank {
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  line-height: 1;
 }
 
 .playing-card.red {
@@ -392,6 +420,17 @@ input[type='checkbox'] {
   flex-direction: column;
   gap: 16px;
   border: 1px solid var(--border);
+}
+
+.count-prompt form {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.count-prompt input {
+  width: 100%;
+  min-width: 0;
 }
 
 @media (min-width: 640px) {
