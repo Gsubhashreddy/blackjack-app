@@ -110,6 +110,23 @@ This runs a TypeScript project build followed by `vite build`, producing an
 optimized, installable PWA bundle in `dist/` (including the web manifest and
 service worker).
 
+## Deploy on GitHub Pages
+
+This repository includes a GitHub Actions workflow that deploys the app to
+GitHub Pages on every push to `main`.
+
+1. In GitHub, open **Settings → Pages**.
+2. Under **Build and deployment**, choose **Source: GitHub Actions**.
+3. Push to `main` (or run the **Deploy to GitHub Pages** workflow manually).
+4. Open the published URL shown in the workflow run (or in Pages settings).
+
+For this repository, the expected production URL is:
+
+- `https://gsubhashreddy.github.io/blackjack-app/`
+
+Once published, open that URL on your phone and use the browser's install/Add
+to Home Screen action.
+
 ### Preview the production build
 
 ```bash
