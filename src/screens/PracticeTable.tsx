@@ -5,16 +5,31 @@ import { HandDisplay } from '../components/HandDisplay';
 import { CountPrompt } from '../components/CountPrompt';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import type { SessionSummary } from '../domain/session';
+import type { TableHand } from '../domain/practiceController';
 
 export interface PracticeTableProps {
   settings: RunningCountSettings;
   onEnd: (summary: SessionSummary) => void;
 }
 
-function seatLabel(seatIndex: number, hand: { id: string }, hasMultipleHands: boolean): string {
-  if (!hasMultipleHands) return `Player ${seatIndex + 1}`;
-  const letter = hand.id.split('-')[1] ?? '';
-  return `Player ${seatIndex + 1}-${letter}`;
+export function PlayerSeats({ seats }: { seats: TableHand[][] }) {
+  return (
+    <div className="seats-row">
+      {seats.map((seatHands, seatIndex) => {
+        const hasMultipleHands = seatHands.length > 1;
+        return (
+          <div className={`seat ${hasMultipleHands ? 'seat-split' : ''}`} key={seatIndex}>
+            <div className="seat-label">Player {seatIndex + 1}</div>
+            <div className={`seat-hands ${hasMultipleHands ? 'seat-hands-scrollable' : ''}`}>
+              {seatHands.map((hand, handIndex) => (
+                <HandDisplay key={hand.id} hand={hand} label={hasMultipleHands ? `Hand ${handIndex + 1}` : undefined} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
@@ -83,15 +98,7 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
           <div className="dealer-row">
             <HandDisplay hand={snapshot.table.dealer} label="Dealer" />
           </div>
-          <div className="seats-row">
-            {snapshot.table.seats.map((seatHands, seatIndex) => (
-              <div className="seat" key={seatIndex}>
-                {seatHands.map((hand) => (
-                  <HandDisplay key={hand.id} hand={hand} label={seatLabel(seatIndex, hand, seatHands.length > 1)} />
-                ))}
-              </div>
-            ))}
-          </div>
+          <PlayerSeats seats={snapshot.table.seats} />
         </div>
       )}
 

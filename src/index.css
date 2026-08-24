@@ -145,13 +145,25 @@ input[type='range'] {
   width: 100%;
 }
 
-input[type='number'] {
+.count-answer-input {
   font-size: 1.1rem;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: #111827;
   color: var(--text);
+  min-width: 0;
+  flex: 1;
+}
+
+.count-answer-control {
+  display: flex;
+  gap: 8px;
+}
+
+.sign-toggle {
+  flex: 0 0 56px;
+  font-size: 1.1rem;
 }
 
 input[type='checkbox'] {
@@ -281,10 +293,12 @@ input[type='checkbox'] {
 }
 
 .seats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  display: flex;
   gap: 8px;
-  justify-items: center;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  overscroll-behavior-inline: contain;
 }
 
 .seat {
@@ -292,6 +306,28 @@ input[type='checkbox'] {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  min-width: 84px;
+  flex: 1 0 84px;
+}
+
+.seat-split {
+  flex: 0 0 auto;
+}
+
+.seat-label {
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+.seat-hands {
+  display: flex;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.seat-hands-scrollable {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
 }
 
 .hand {

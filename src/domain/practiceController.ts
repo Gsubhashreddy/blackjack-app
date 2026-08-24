@@ -151,6 +151,25 @@ export class PracticeController {
   }
 
   private applyEvent(event: RoundEvent) {
+    if (event.kind === 'split') {
+      const { seatIndex, handId } = event.target;
+      const seats = this.table.seats.map((seatHands, i) => {
+        if (i !== seatIndex) return seatHands;
+        const cloned = seatHands.map((hand) => ({ ...hand, cards: [...hand.cards] }));
+        const sourceIndex = cloned.findIndex((hand) => hand.id === handId);
+        const splitHands = event.hands.map(({ id, card }) => ({
+          id,
+          cards: [{ card, faceUp: true }],
+          status: 'active' as HandStatus,
+        }));
+        if (sourceIndex === -1) return [...cloned, ...splitHands];
+        cloned.splice(sourceIndex, 1, ...splitHands);
+        return cloned;
+      });
+      this.table = { ...this.table, seats };
+      return;
+    }
+
     if (event.target.type === 'dealer') {
       if (event.kind === 'deal') {
         this.table = {
@@ -192,10 +211,14 @@ export class PracticeController {
     const output = this.roundOutput;
     if (!output) return;
     this.table = {
-      seats: this.table.seats.map((seatHands, seatIndex) =>
-        seatHands.map((hand) => {
-          const finalHand = output.seats[seatIndex].find((h) => h.id === hand.id);
-          return finalHand ? { ...hand, status: finalHand.status } : hand;
+      seats: output.seats.map((finalHands, seatIndex) =>
+        finalHands.map((finalHand) => {
+          const tableHand = this.table.seats[seatIndex].find((hand) => hand.id === finalHand.id);
+          return {
+            id: finalHand.id,
+            cards: tableHand?.cards ?? finalHand.cards.map((card) => ({ card, faceUp: true })),
+            status: finalHand.status,
+          };
         }),
       ),
       dealer: { ...this.table.dealer, status: output.dealer.status },
