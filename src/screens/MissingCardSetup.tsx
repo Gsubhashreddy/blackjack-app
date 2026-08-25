@@ -27,7 +27,7 @@ export function MissingCardSetup({ onStart, onBack }: MissingCardSetupProps) {
 
       <fieldset className="field">
         <legend>Deck count</legend>
-        <div className="segmented" role="radiogroup" aria-label="Deck count">
+        <div className="segmented">
           {DECK_OPTIONS.map((deckCount) => (
             <button
               key={deckCount}
