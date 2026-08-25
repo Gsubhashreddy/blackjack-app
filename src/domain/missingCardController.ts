@@ -1,4 +1,5 @@
-import { createDeck, hiLoValue, type Card } from './cards';
+import { createDeck, hiLoValue, type Card, type Rank } from './cards';
+import { RunningCount } from './count';
 import { type Rng, shuffle } from './shoe';
 import { speedToDelayMs } from './session';
 
@@ -27,6 +28,12 @@ export interface MissingCardResult {
   endedEarly: boolean;
 }
 
+export interface MissingCardCountFeedback {
+  correct: boolean;
+  correctAnswer: number;
+  userAnswer: number;
+}
+
 export interface MissingCardSnapshot {
   phase: MissingCardPhase;
   currentCard: Card | null;
@@ -34,7 +41,46 @@ export interface MissingCardSnapshot {
   cardsToDeal: number;
   progress: number;
   result: MissingCardResult | null;
+  countFeedback: MissingCardCountFeedback | null;
   settings: MissingCardSettings;
+}
+
+function canContinueWithoutMatchingRank(cards: Card[], previousRank: Rank): boolean {
+  const counts = new Map<Rank, number>();
+  for (const card of cards) {
+    counts.set(card.rank, (counts.get(card.rank) ?? 0) + 1);
+  }
+
+  for (const [rank, count] of counts) {
+    const availableSlots =
+      rank === previousRank ? Math.floor(cards.length / 2) : Math.ceil(cards.length / 2);
+    if (count > availableSlots) return false;
+  }
+  return true;
+}
+
+function avoidConsecutiveMatchingRanks(cards: Card[]): Card[] {
+  if (cards.length < 2) return cards.slice();
+
+  const remaining = cards.slice();
+  const arranged = [remaining.shift()!];
+
+  while (remaining.length > 0) {
+    const previousRank = arranged[arranged.length - 1].rank;
+    const nextIndex = remaining.findIndex((card, index) => {
+      if (card.rank === previousRank) return false;
+      const cardsAfterChoice = remaining.slice();
+      cardsAfterChoice.splice(index, 1);
+      return canContinueWithoutMatchingRank(cardsAfterChoice, card.rank);
+    });
+
+    if (nextIndex < 0) {
+      throw new Error('Unable to arrange cards without consecutive matching ranks');
+    }
+    arranged.push(remaining.splice(nextIndex, 1)[0]);
+  }
+
+  return arranged;
 }
 
 export class MissingCardController {
@@ -46,6 +92,8 @@ export class MissingCardController {
   private currentCard: Card | null = null;
   private cardsDealt = 0;
   private result: MissingCardResult | null = null;
+  private count = new RunningCount();
+  private countFeedback: MissingCardCountFeedback | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(settings: MissingCardSettings, onChange: () => void, rng: Rng = Math.random) {
@@ -58,7 +106,7 @@ export class MissingCardController {
     }
     const shuffled = shuffle(shoe, rng);
     this.hiddenCard = shuffled.pop()!;
-    this.cards = shuffled;
+    this.cards = avoidConsecutiveMatchingRanks(shuffled);
   }
 
   getSnapshot(): MissingCardSnapshot {
@@ -69,6 +117,7 @@ export class MissingCardController {
       cardsToDeal: this.cards.length,
       progress: this.cardsDealt / this.cards.length,
       result: this.result,
+      countFeedback: this.countFeedback,
       settings: this.settings,
     };
   }
@@ -88,8 +137,26 @@ export class MissingCardController {
 
   resume(): void {
     if (this.phase !== 'paused') return;
+    this.countFeedback = null;
     this.phase = 'dealing';
     this.scheduleNextCard();
+    this.onChange();
+  }
+
+  submitRunningCount(userAnswer: number): void {
+    if (this.phase !== 'paused' || this.countFeedback) return;
+    const correctAnswer = this.count.value();
+    this.countFeedback = {
+      correct: userAnswer === correctAnswer,
+      correctAnswer,
+      userAnswer,
+    };
+    this.onChange();
+  }
+
+  clearCountFeedback(): void {
+    if (this.phase !== 'paused' || !this.countFeedback) return;
+    this.countFeedback = null;
     this.onChange();
   }
 
@@ -124,6 +191,7 @@ export class MissingCardController {
 
     this.currentCard = this.cards[this.cardsDealt];
     this.cardsDealt += 1;
+    this.count.addCard(this.currentCard);
     this.onChange();
     this.scheduleNextCard();
   }

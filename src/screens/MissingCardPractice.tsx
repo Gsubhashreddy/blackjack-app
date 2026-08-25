@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { CountPrompt } from '../components/CountPrompt';
 import { PlayingCard } from '../components/PlayingCard';
 import type { HiLoGuess, MissingCardResult, MissingCardSettings } from '../domain/missingCardController';
 import { useMissingCardController } from '../hooks/useMissingCardController';
@@ -16,6 +17,7 @@ const GUESS_OPTIONS: { value: HiLoGuess; label: string; description: string }[] 
 
 export function MissingCardPractice({ settings, onEnd }: MissingCardPracticeProps) {
   const { snapshot, controller } = useMissingCardController(settings);
+  const [showCountPrompt, setShowCountPrompt] = useState(false);
 
   useEffect(() => {
     if (snapshot?.phase === 'result' && snapshot.result) {
@@ -84,10 +86,19 @@ export function MissingCardPractice({ settings, onEnd }: MissingCardPracticeProp
         </section>
       ) : (
         <div className="table-controls">
+          {isPaused && (
+            <button type="button" className="secondary-button" onClick={() => setShowCountPrompt(true)}>
+              Check running count
+            </button>
+          )}
           <button
             type="button"
             className="secondary-button"
-            onClick={() => (isPaused ? controller.resume() : controller.pause())}
+            onClick={() => {
+              setShowCountPrompt(false);
+              if (isPaused) controller.resume();
+              else controller.pause();
+            }}
           >
             {isPaused ? 'Resume' : 'Pause'}
           </button>
@@ -96,6 +107,16 @@ export function MissingCardPractice({ settings, onEnd }: MissingCardPracticeProp
           </button>
         </div>
       )}
+
+      <CountPrompt
+        visible={isPaused && showCountPrompt}
+        feedback={snapshot.countFeedback}
+        onSubmit={(value) => controller.submitRunningCount(value)}
+        onContinue={() => {
+          controller.clearCountFeedback();
+          setShowCountPrompt(false);
+        }}
+      />
     </main>
   );
 }
