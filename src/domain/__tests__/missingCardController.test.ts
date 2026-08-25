@@ -92,19 +92,25 @@ describe('MissingCardController', () => {
   it('checks the running count while paused and reveals the answer when incorrect', () => {
     vi.useFakeTimers();
     const controller = new MissingCardController(settings(), () => {}, () => 0);
+    const visibleRanks: Rank[] = [];
     controller.start();
-    const visibleCard = controller.getSnapshot().currentCard!;
+    visibleRanks.push(controller.getSnapshot().currentCard!.rank);
+    for (let i = 0; i < 4; i += 1) {
+      vi.advanceTimersByTime(speedToDelayMs(10));
+      visibleRanks.push(controller.getSnapshot().currentCard!.rank);
+    }
+    const expectedCount = visibleRanks.reduce((total, rank) => total + hiLoValue(rank), 0);
     controller.pause();
 
     controller.submitRunningCount(999);
     expect(controller.getSnapshot().countFeedback).toEqual({
       correct: false,
-      correctAnswer: hiLoValue(visibleCard.rank),
+      correctAnswer: expectedCount,
       userAnswer: 999,
     });
 
     controller.clearCountFeedback();
-    controller.submitRunningCount(hiLoValue(visibleCard.rank));
+    controller.submitRunningCount(expectedCount);
     expect(controller.getSnapshot().countFeedback?.correct).toBe(true);
 
     controller.resume();
