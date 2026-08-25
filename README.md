@@ -1,8 +1,8 @@
 # Blackjack Count Trainer
 
 A mobile-first Progressive Web App (PWA) for practicing Blackjack card
-counting. This first milestone implements **Running Count Practice** using
-the standard Hi-Lo counting system. **True Count** and **Basic Strategy
+counting with the standard Hi-Lo system. It includes **Running Count
+Practice** and a **Missing Card** drill. **True Count** and **Basic Strategy
 Drills** are shown on the home screen as "Coming soon" and are not yet
 implemented.
 
@@ -22,6 +22,10 @@ implemented.
   summary.
 - Pause, reset (with confirmation), or end the session at any time. Sessions
   end automatically once the shoe's randomized cut card is reached.
+- Practice the Missing Card drill with 1, 2, 4, 6, or 8 decks: one card is
+  hidden, all remaining cards appear one at a time, and you identify the
+  hidden card's Hi-Lo value. The drill supports adjustable speed,
+  pause/resume, early exit, and replay.
 - Installable as a PWA on mobile home screens, with responsive, accessible,
   mobile-first styling.
 
