@@ -27,6 +27,13 @@ describe('Missing Card flow', () => {
     expect(screen.getByText('Cards dealt: 1 / 51')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Pause' }));
     expect(screen.getByRole('status')).toHaveTextContent('Session paused');
+    await user.click(screen.getByRole('button', { name: 'Check running count' }));
+    await user.type(screen.getByLabelText('Your answer'), '999');
+    await user.click(screen.getByRole('button', { name: 'Submit' }));
+    expect(screen.getByText('Incorrect')).toBeInTheDocument();
+    expect(screen.getByText(/Correct running count: -?\d+/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByRole('status')).toHaveTextContent('Session paused');
     await act(async () => {
       vi.advanceTimersByTime(10_000);
     });
