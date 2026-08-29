@@ -122,7 +122,7 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
 
       {isPaused && !showResetConfirm && !showTableSettings && (
         <div className="pause-menu-layer">
-          <section className="pause-menu" role="dialog" aria-labelledby="pause-menu-title">
+          <section className="pause-menu" role="dialog" aria-modal="false" aria-labelledby="pause-menu-title">
             <h2 id="pause-menu-title">Game paused</h2>
             <button type="button" className="primary-button" onClick={() => controller.resume()}>
               Resume

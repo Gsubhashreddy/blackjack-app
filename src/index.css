@@ -293,6 +293,8 @@ input[type='checkbox'] {
 }
 
 .running-count-screen .session-progress {
+  position: relative;
+  z-index: 16;
   padding: 0 4px;
 }
 
@@ -381,7 +383,7 @@ input[type='checkbox'] {
   place-items: center;
   padding: 72px 16px 16px;
   background: rgba(3, 10, 7, 0.38);
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .pause-menu {
