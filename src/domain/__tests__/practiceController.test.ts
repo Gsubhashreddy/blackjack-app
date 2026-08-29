@@ -58,6 +58,20 @@ describe('PracticeController', () => {
     expect(controller.getSnapshot().phase).toBe('dealing');
   });
 
+  it('checks the running count on demand and returns to the paused game', () => {
+    const controller = new PracticeController(settings({ askEveryRounds: 10 }), () => {});
+    controller.start();
+    vi.advanceTimersByTime(300);
+    controller.pause();
+    controller.checkRunningCount();
+
+    expect(controller.getSnapshot().phase).toBe('awaiting-count');
+    controller.submitAnswer(0);
+    expect(controller.getSnapshot().phase).toBe('answered');
+    controller.continueAfterAnswer();
+    expect(controller.getSnapshot().phase).toBe('paused');
+  });
+
   it('asks for the running count after the configured number of rounds', () => {
     const controller = new PracticeController(settings({ askEveryRounds: 1, seatCount: 1 }), () => {});
     controller.start();

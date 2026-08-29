@@ -68,6 +68,7 @@ describe('End-to-end practice flow', () => {
     await act(async () => {
       vi.advanceTimersByTime(300);
     });
+    await user.click(screen.getByRole('button', { name: 'Pause' }));
     await user.click(screen.getByRole('button', { name: /End Session/i }));
 
     expect(await screen.findByRole('heading', { name: /Session Summary/i })).toBeInTheDocument();

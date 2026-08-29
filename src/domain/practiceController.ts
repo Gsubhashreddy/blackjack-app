@@ -79,6 +79,7 @@ export class PracticeController {
   private roundEventIndex = 0;
   private roundOutput: RoundOutput | null = null;
   private pendingCutCardEnd = false;
+  private manualCountCheck = false;
   private ended = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private onChange: () => void;
@@ -286,6 +287,13 @@ export class PracticeController {
     this.onChange();
   }
 
+  checkRunningCount(): void {
+    if (this.phase !== 'paused') return;
+    this.manualCountCheck = true;
+    this.phase = 'awaiting-count';
+    this.onChange();
+  }
+
   resume(): void {
     if (this.phase !== 'paused') return;
     this.phase = 'dealing';
@@ -297,6 +305,7 @@ export class PracticeController {
     this.clearTimer();
     this.ended = false;
     this.pendingCutCardEnd = false;
+    this.manualCountCheck = false;
     this.roundsCompleted = 0;
     this.visibleCardsDealt = 0;
     this.shoe = new Shoe({ deckCount: this.settings.deckCount });
@@ -326,6 +335,12 @@ export class PracticeController {
   continueAfterAnswer(): void {
     if (this.phase !== 'answered') return;
     this.answerFeedback = null;
+    if (this.manualCountCheck) {
+      this.manualCountCheck = false;
+      this.phase = 'paused';
+      this.onChange();
+      return;
+    }
     if (this.pendingCutCardEnd) {
       this.endSessionInternal('cut-card');
       return;
