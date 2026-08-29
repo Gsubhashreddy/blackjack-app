@@ -34,6 +34,18 @@ describe('Practice table settings', () => {
     expect(screen.queryByRole('dialog', { name: 'Table visibility' })).not.toBeInTheDocument();
   });
 
+  it('keeps secondary actions in the pause menu and supports an on-demand count check', () => {
+    render(<PracticeTable settings={{ ...DEFAULT_SETTINGS, seatCount: 1 }} onEnd={() => {}} />);
+
+    expect(screen.queryByRole('button', { name: 'End session' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
+
+    const pauseMenu = screen.getByRole('dialog', { name: 'Game paused' });
+    expect(pauseMenu).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Check running count' }));
+    expect(screen.getByRole('dialog', { name: 'What is the running count?' })).toBeInTheDocument();
+  });
+
   it('groups multiple players while making split hands horizontal and sequentially numbered', () => {
     const { container } = render(
       <PlayerSeats

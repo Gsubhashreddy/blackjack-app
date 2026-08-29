@@ -50,7 +50,7 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
 
   if (!snapshot || !controller) {
     return (
-      <main className="screen practice-screen">
+      <main className="screen practice-screen running-count-screen">
         <p>Loading…</p>
       </main>
     );
@@ -66,23 +66,37 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
   const hideTableBehindPrompt = showPrompt && !tableVisibility.showTableDuringPrompt;
 
   return (
-    <main className="screen practice-screen">
+    <main className="screen practice-screen running-count-screen">
+      <p className="orientation-hint" role="status">
+        Rotate your device for the full table view
+      </p>
       <div className="session-progress" aria-live="polite">
         <div className="session-progress-details">
           <span>Round {snapshot.roundsCompleted + (snapshot.phase === 'dealing' ? 1 : 0)}</span>
           <span>Cards dealt: {snapshot.visibleCardsDealt}</span>
           <span>Shoe: {Math.round(snapshot.shoeProgress * 100)}%</span>
         </div>
-        <button
-          type="button"
-          className="settings-button"
-          aria-label="Table visibility settings"
-          aria-expanded={showTableSettings}
-          onClick={() => setShowTableSettings(true)}
-          disabled={showPrompt}
-        >
-          <span aria-hidden="true">⚙</span>
-        </button>
+        <div className="table-top-actions">
+          <button
+            type="button"
+            className="table-icon-button"
+            aria-label={isPaused ? 'Resume' : 'Pause'}
+            onClick={() => (isPaused ? controller.resume() : controller.pause())}
+            disabled={showPrompt}
+          >
+            <span aria-hidden="true">{isPaused ? '▶' : 'Ⅱ'}</span>
+          </button>
+          <button
+            type="button"
+            className="table-icon-button settings-button"
+            aria-label="Table visibility settings"
+            aria-expanded={showTableSettings}
+            onClick={() => setShowTableSettings(true)}
+            disabled={showPrompt}
+          >
+            <span aria-hidden="true">⚙</span>
+          </button>
+        </div>
       </div>
 
       {hideTableWhilePaused ? (
@@ -94,30 +108,37 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
           <p>Table hidden during count prompt.</p>
         </div>
       ) : (
-        <div className="table-felt">
+        <div className="table-felt running-count-table">
           <div className="dealer-row">
             <HandDisplay hand={snapshot.table.dealer} label="Dealer" />
+          </div>
+          <div className="table-markings" aria-hidden="true">
+            <strong>BLACKJACK PAYS 3 TO 2</strong>
+            <span>Dealer stands on 17</span>
           </div>
           <PlayerSeats seats={snapshot.table.seats} />
         </div>
       )}
 
-      <div className="table-controls">
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={() => (isPaused ? controller.resume() : controller.pause())}
-          disabled={showPrompt}
-        >
-          {isPaused ? 'Resume' : 'Pause'}
-        </button>
-        <button type="button" className="secondary-button" onClick={() => setShowResetConfirm(true)}>
-          Reset
-        </button>
-        <button type="button" className="danger-button" onClick={() => controller.endSession()}>
-          End Session
-        </button>
-      </div>
+      {isPaused && !showResetConfirm && !showTableSettings && (
+        <div className="pause-menu-layer">
+          <section className="pause-menu" role="dialog" aria-labelledby="pause-menu-title">
+            <h2 id="pause-menu-title">Game paused</h2>
+            <button type="button" className="primary-button" onClick={() => controller.resume()}>
+              Resume
+            </button>
+            <button type="button" className="secondary-button" onClick={() => controller.checkRunningCount()}>
+              Check running count
+            </button>
+            <button type="button" className="secondary-button" onClick={() => setShowResetConfirm(true)}>
+              Reset session
+            </button>
+            <button type="button" className="danger-button" onClick={() => controller.endSession()}>
+              End session
+            </button>
+          </section>
+        </div>
+      )}
 
       {showTableSettings && (
         <div className="modal-overlay" role="presentation">
