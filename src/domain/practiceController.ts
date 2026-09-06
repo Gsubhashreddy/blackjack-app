@@ -31,6 +31,8 @@ export interface AnswerFeedback {
 export interface PracticeSnapshot {
   phase: Phase;
   table: TableState;
+  activeHandId: string | null;
+  elapsedSeconds: number;
   roundsCompleted: number;
   visibleCardsDealt: number;
   shoeProgress: number;
@@ -81,7 +83,11 @@ export class PracticeController {
   private pendingCutCardEnd = false;
   private manualCountCheck = false;
   private ended = false;
-  private timer: ReturnType<typeof setTimeout> | null = null;
+  private activeHandId: string | null = null;
+  private elapsedActiveMs = 0;
+  private elapsedStartedAt: number | null = null;
+  private cardTimer: ReturnType<typeof setTimeout> | null = null;
+  private elapsedTimer: ReturnType<typeof setTimeout> | null = null;
   private onChange: () => void;
 
   constructor(settings: RunningCountSettings, onChange: () => void) {
@@ -95,6 +101,8 @@ export class PracticeController {
     return {
       phase: this.phase,
       table: this.table,
+      activeHandId: this.activeHandId,
+      elapsedSeconds: Math.floor(this.currentElapsedMs() / 1000),
       roundsCompleted: this.roundsCompleted,
       visibleCardsDealt: this.visibleCardsDealt,
       shoeProgress: this.shoe.progress(),
@@ -110,34 +118,82 @@ export class PracticeController {
   }
 
   destroy(): void {
-    this.clearTimer();
+    this.freezeElapsedClock();
+    this.clearCardTimer();
   }
 
-  private clearTimer() {
-    if (this.timer) {
-      clearTimeout(this.timer);
-      this.timer = null;
+  private clearCardTimer() {
+    if (this.cardTimer !== null) {
+      clearTimeout(this.cardTimer);
+      this.cardTimer = null;
     }
+  }
+
+  private clearElapsedTimer() {
+    if (this.elapsedTimer !== null) {
+      clearTimeout(this.elapsedTimer);
+      this.elapsedTimer = null;
+    }
+  }
+
+  private currentElapsedMs(now = Date.now()): number {
+    if (this.elapsedStartedAt === null) return this.elapsedActiveMs;
+    return this.elapsedActiveMs + Math.max(0, now - this.elapsedStartedAt);
+  }
+
+  private startElapsedClock() {
+    if (this.elapsedStartedAt !== null) return;
+    this.elapsedStartedAt = Date.now();
+    this.scheduleElapsedTick();
+  }
+
+  private scheduleElapsedTick() {
+    this.clearElapsedTimer();
+    const remainder = this.currentElapsedMs() % 1000;
+    const delay = remainder === 0 ? 1000 : 1000 - remainder;
+    this.elapsedTimer = setTimeout(() => {
+      this.elapsedTimer = null;
+      if (this.elapsedStartedAt === null || this.phase !== 'dealing' || this.ended) return;
+      this.onChange();
+      this.scheduleElapsedTick();
+    }, delay);
+  }
+
+  private freezeElapsedClock() {
+    this.clearElapsedTimer();
+    if (this.elapsedStartedAt === null) return;
+    this.elapsedActiveMs = this.currentElapsedMs();
+    this.elapsedStartedAt = null;
+  }
+
+  private resetElapsedClock() {
+    this.clearElapsedTimer();
+    this.elapsedActiveMs = 0;
+    this.elapsedStartedAt = null;
   }
 
   private startNextRound() {
     if (this.ended) return;
+    this.freezeElapsedClock();
     const output = playRound(this.shoe, this.settings.seatCount);
     this.roundOutput = output;
     this.roundEvents = output.events;
     this.roundEventIndex = 0;
     this.table = emptyTable(this.settings.seatCount);
+    this.activeHandId = null;
     this.phase = 'dealing';
-    this.clearTimer();
+    this.clearCardTimer();
+    this.startElapsedClock();
     this.scheduleNextStep();
     this.onChange();
   }
 
   private scheduleNextStep() {
-    this.timer = setTimeout(() => this.stepEvent(), speedToDelayMs(this.settings.speed));
+    this.cardTimer = setTimeout(() => this.stepEvent(), speedToDelayMs(this.settings.speed));
   }
 
   private stepEvent() {
+    this.cardTimer = null;
     if (this.ended || this.phase === 'paused') return;
     const idx = this.roundEventIndex;
     if (idx >= this.roundEvents.length) {
@@ -153,6 +209,7 @@ export class PracticeController {
 
   private applyEvent(event: RoundEvent) {
     if (event.kind === 'split') {
+      this.activeHandId = event.hands[0].id;
       const { seatIndex, handId } = event.target;
       const seats = this.table.seats.map((seatHands, i) => {
         if (i !== seatIndex) return seatHands;
@@ -172,6 +229,7 @@ export class PracticeController {
     }
 
     if (event.target.type === 'dealer') {
+      this.activeHandId = 'D';
       if (event.kind === 'deal') {
         this.table = {
           ...this.table,
@@ -196,6 +254,7 @@ export class PracticeController {
     }
 
     const { seatIndex, handId } = event.target;
+    this.activeHandId = handId;
     const seats = this.table.seats.map((seatHands, i) => {
       if (i !== seatIndex) return seatHands;
       const cloned = seatHands.map((h) => ({ ...h, cards: [...h.cards] }));
@@ -229,6 +288,9 @@ export class PracticeController {
   private finishRound() {
     const output = this.roundOutput;
     if (!output) return;
+    this.clearCardTimer();
+    this.freezeElapsedClock();
+    this.activeHandId = null;
     this.applyFinalStatuses();
     this.roundsCompleted += 1;
     this.pendingCutCardEnd = output.cutCardCrossed;
@@ -274,7 +336,9 @@ export class PracticeController {
 
   private endSessionInternal(endReason: EndReason) {
     this.ended = true;
-    this.clearTimer();
+    this.clearCardTimer();
+    this.freezeElapsedClock();
+    this.activeHandId = null;
     this.summary = this.buildSummary(endReason);
     this.phase = 'summary';
     this.onChange();
@@ -282,7 +346,8 @@ export class PracticeController {
 
   pause(): void {
     if (this.phase === 'summary' || this.ended) return;
-    this.clearTimer();
+    this.clearCardTimer();
+    this.freezeElapsedClock();
     this.phase = 'paused';
     this.onChange();
   }
@@ -297,12 +362,14 @@ export class PracticeController {
   resume(): void {
     if (this.phase !== 'paused') return;
     this.phase = 'dealing';
+    this.startElapsedClock();
     this.scheduleNextStep();
     this.onChange();
   }
 
   reset(): void {
-    this.clearTimer();
+    this.clearCardTimer();
+    this.resetElapsedClock();
     this.ended = false;
     this.pendingCutCardEnd = false;
     this.manualCountCheck = false;
@@ -313,6 +380,7 @@ export class PracticeController {
     this.answers = [];
     this.answerFeedback = null;
     this.summary = null;
+    this.activeHandId = null;
     this.startNextRound();
   }
 

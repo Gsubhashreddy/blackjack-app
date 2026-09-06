@@ -58,6 +58,11 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
+[tabindex='0']:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: -3px;
+}
+
 .screen {
   max-width: 640px;
   margin: 0 auto;
@@ -264,6 +269,11 @@ input[type='checkbox'] {
   flex: 1;
 }
 
+.session-timer {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .table-icon-button {
   width: 36px;
   height: 36px;
@@ -286,10 +296,12 @@ input[type='checkbox'] {
 }
 
 .running-count-screen {
-  width: min(100%, 1280px);
+  width: 100%;
   max-width: none;
+  min-height: 100dvh;
   gap: 10px;
-  padding: 12px clamp(12px, 2vw, 28px) 20px;
+  padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
 
 .running-count-screen .session-progress {
@@ -312,24 +324,24 @@ input[type='checkbox'] {
 .running-count-table {
   position: relative;
   width: 100%;
-  min-height: clamp(390px, 68svh, 680px);
-  padding: clamp(18px, 3vw, 38px);
-  border: clamp(8px, 1.4vw, 16px) solid #4a2918;
-  border-radius: 32px 32px 45% 45% / 32px 32px 18% 18%;
+  flex: 1;
+  min-height: 0;
+  padding: clamp(12px, 2vw, 28px) clamp(10px, 2vw, 28px) clamp(24px, 5vh, 48px);
+  border: clamp(6px, 1vw, 14px) solid #4a2918;
+  border-radius: 32px 32px 12% 12% / 32px 32px 8% 8%;
   box-shadow:
     inset 0 0 0 3px #b88a43,
     inset 0 0 45px rgba(0, 0, 0, 0.45),
     0 8px 22px rgba(0, 0, 0, 0.5);
   justify-content: space-between;
-  overflow: hidden;
 }
 
 .running-count-table::before {
   content: '';
   position: absolute;
-  inset: 12px 18px 18px;
+  inset: 8px;
   border: 2px solid rgba(236, 208, 137, 0.65);
-  border-radius: 24px 24px 44% 44% / 24px 24px 18% 18%;
+  border-radius: 24px 24px 12% 12% / 24px 24px 8% 8%;
   pointer-events: none;
 }
 
@@ -362,17 +374,33 @@ input[type='checkbox'] {
 
 .running-count-table .seats-row {
   width: 100%;
-  justify-content: space-evenly;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: stretch;
   overflow: visible;
 }
 
 .running-count-table .seat {
   min-width: 0;
-  flex: 1 1 0;
+  padding: 8px;
+  border: 2px solid rgba(236, 208, 137, 0.3);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.running-count-table .seat-receiving {
+  border-color: #fde68a;
+  background: rgba(253, 230, 138, 0.12);
+}
+
+.running-count-table .seat-label {
+  font-weight: 700;
 }
 
 .running-count-screen .paused-panel {
-  min-height: clamp(390px, 68svh, 680px);
+  flex: 1;
+  min-height: 300px;
 }
 
 .pause-menu-layer {
@@ -396,6 +424,8 @@ input[type='checkbox'] {
   background: rgba(17, 24, 39, 0.97);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
   pointer-events: auto;
+  max-height: calc(100dvh - 88px);
+  overflow-y: auto;
 }
 
 .pause-menu h2 {
@@ -404,6 +434,11 @@ input[type='checkbox'] {
 }
 
 @media (max-width: 699px) and (orientation: portrait) {
+  .running-count-table .seats-row {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .orientation-hint {
     display: block;
     margin: 0;
@@ -418,12 +453,39 @@ input[type='checkbox'] {
 
 @media (max-height: 520px) and (orientation: landscape) {
   .running-count-screen {
-    padding-top: 8px;
+    gap: 6px;
   }
 
   .running-count-table,
   .running-count-screen .paused-panel {
-    min-height: calc(100svh - 62px);
+    min-height: 0;
+  }
+
+  .running-count-table {
+    padding: 10px 8px 20px;
+    gap: 8px;
+  }
+
+  .running-count-table .seat {
+    padding: 4px;
+  }
+
+  .running-count-table .seats-row {
+    gap: 4px;
+  }
+
+  .running-count-table .hand {
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .running-count-table .hand-cards {
+    min-height: 52px;
+  }
+
+  .running-count-table .playing-card,
+  .running-count-table .hand-cards-placeholder {
+    height: 52px;
   }
 
   .table-markings {
@@ -433,7 +495,11 @@ input[type='checkbox'] {
 
 .dealer-row {
   display: flex;
-  justify-content: center;
+  overflow-x: auto;
+}
+
+.dealer-row .hand {
+  margin-inline: auto;
 }
 
 .seats-row {
@@ -467,11 +533,17 @@ input[type='checkbox'] {
   display: flex;
   gap: 8px;
   max-width: 100%;
+  width: 100%;
 }
 
 .seat-hands-scrollable {
   overflow-x: auto;
   overscroll-behavior-inline: contain;
+  padding: 4px;
+}
+
+.seat-hands > .hand:only-child {
+  margin-inline: auto;
 }
 
 .hand {
@@ -480,6 +552,22 @@ input[type='checkbox'] {
   align-items: center;
   gap: 4px;
   min-width: 84px;
+  flex: 0 0 auto;
+  padding: 4px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+}
+
+.hand-receiving {
+  border-color: #fde68a;
+  background: rgba(253, 230, 138, 0.1);
+}
+
+.dealing-indicator {
+  color: #fde68a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .hand-label {
@@ -521,6 +609,13 @@ input[type='checkbox'] {
 .card-rank {
   position: absolute;
   top: 4px;
+  left: 5px;
+  line-height: 1;
+}
+
+.running-count-table .card-suit {
+  position: absolute;
+  bottom: 5px;
   left: 5px;
   line-height: 1;
 }
@@ -661,6 +756,8 @@ input[type='checkbox'] {
   flex-direction: column;
   gap: 16px;
   border: 1px solid var(--border);
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
 }
 
 .count-prompt form {

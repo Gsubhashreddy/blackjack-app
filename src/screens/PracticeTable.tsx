@@ -12,20 +12,35 @@ export interface PracticeTableProps {
   onEnd: (summary: SessionSummary) => void;
 }
 
-export function PlayerSeats({ seats }: { seats: TableHand[][] }) {
+export function PlayerSeats({ seats, activeHandId = null }: { seats: TableHand[][]; activeHandId?: string | null }) {
   return (
     <div className="seats-row">
       {seats.map((seatHands, seatIndex) => {
         const hasMultipleHands = seatHands.length > 1;
+        const isReceiving = seatHands.some((hand) => hand.id === activeHandId);
         return (
-          <div className={`seat ${hasMultipleHands ? 'seat-split' : ''}`} key={seatIndex}>
+          <section
+            className={`seat ${hasMultipleHands ? 'seat-split' : ''} ${isReceiving ? 'seat-receiving' : ''}`}
+            aria-label={`Player ${seatIndex + 1}`}
+            key={seatIndex}
+          >
             <div className="seat-label">Player {seatIndex + 1}</div>
-            <div className={`seat-hands ${hasMultipleHands ? 'seat-hands-scrollable' : ''}`}>
+            <div
+              className="seat-hands seat-hands-scrollable"
+              role="group"
+              aria-label={`Player ${seatIndex + 1} hands`}
+              tabIndex={0}
+            >
               {seatHands.map((hand, handIndex) => (
-                <HandDisplay key={hand.id} hand={hand} label={hasMultipleHands ? `Hand ${handIndex + 1}` : undefined} />
+                <HandDisplay
+                  key={hand.id}
+                  hand={hand}
+                  label={hasMultipleHands ? `Hand ${handIndex + 1}` : undefined}
+                  receiving={hand.id === activeHandId}
+                />
               ))}
             </div>
-          </div>
+          </section>
         );
       })}
     </div>
@@ -64,16 +79,20 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
   const showPrompt = snapshot.phase === 'awaiting-count' || snapshot.phase === 'answered';
   const hideTableWhilePaused = isPaused && !tableVisibility.showTableWhilePaused;
   const hideTableBehindPrompt = showPrompt && !tableVisibility.showTableDuringPrompt;
+  const activeHandId = snapshot.phase === 'dealing' ? snapshot.activeHandId : null;
 
   return (
     <main className="screen practice-screen running-count-screen">
       <p className="orientation-hint" role="status">
-        Rotate your device for the full table view
+        Rotate your device for a wider table. Turn off rotation lock if needed.
       </p>
       <div className="session-progress" aria-live="polite">
         <div className="session-progress-details">
           <span>Round {snapshot.roundsCompleted + (snapshot.phase === 'dealing' ? 1 : 0)}</span>
           <span>Cards dealt: {snapshot.visibleCardsDealt}</span>
+          <span className="session-timer" role="timer" aria-live="off" aria-label="Active session time">
+            Time: {snapshot.elapsedSeconds}s
+          </span>
           <span>Shoe: {Math.round(snapshot.shoeProgress * 100)}%</span>
         </div>
         <div className="table-top-actions">
@@ -109,14 +128,14 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
         </div>
       ) : (
         <div className="table-felt running-count-table">
-          <div className="dealer-row">
-            <HandDisplay hand={snapshot.table.dealer} label="Dealer" />
+          <div className="dealer-row" role="group" aria-label="Dealer hand" tabIndex={0}>
+            <HandDisplay hand={snapshot.table.dealer} label="Dealer" receiving={activeHandId === 'D'} />
           </div>
           <div className="table-markings" aria-hidden="true">
             <strong>BLACKJACK PAYS 3 TO 2</strong>
             <span>Dealer stands on 17</span>
           </div>
-          <PlayerSeats seats={snapshot.table.seats} />
+          <PlayerSeats seats={snapshot.table.seats} activeHandId={activeHandId} />
         </div>
       )}
 
