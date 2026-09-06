@@ -86,7 +86,7 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
       <p className="orientation-hint" role="status">
         Rotate your device for a wider table. Turn off rotation lock if needed.
       </p>
-      <div className="session-progress" aria-live="polite">
+      <div className="session-progress">
         <div className="session-progress-details">
           <span>Round {snapshot.roundsCompleted + (snapshot.phase === 'dealing' ? 1 : 0)}</span>
           <span>Cards dealt: {snapshot.visibleCardsDealt}</span>

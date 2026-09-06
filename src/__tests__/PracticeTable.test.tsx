@@ -25,6 +25,7 @@ describe('Practice table settings', () => {
     const timer = screen.getByRole('timer', { name: 'Active session time' });
     expect(timer).toHaveTextContent('Time: 0s');
     expect(timer).toHaveAttribute('aria-live', 'off');
+    expect(timer.closest('[aria-live="polite"], [aria-live="assertive"]')).toBeNull();
     act(() => vi.advanceTimersByTime(1000));
     expect(timer).toHaveTextContent('Time: 1s');
     fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
