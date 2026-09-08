@@ -204,6 +204,10 @@ export class PracticeController {
     const event = this.roundEvents[idx];
     this.roundEventIndex = idx + 1;
     this.applyEvent(event);
+    if (this.roundEventIndex === this.roundEvents.length) {
+      this.applyFinalStatuses();
+      this.activeHandId = null;
+    }
     this.scheduleNextStep();
     this.onChange();
   }
@@ -292,7 +296,6 @@ export class PracticeController {
     this.clearCardTimer();
     this.freezeElapsedClock();
     this.activeHandId = null;
-    this.applyFinalStatuses();
     this.roundsCompleted += 1;
     this.pendingCutCardEnd = output.cutCardCrossed;
 

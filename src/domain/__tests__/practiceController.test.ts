@@ -45,6 +45,11 @@ describe('PracticeController', () => {
     vi.advanceTimersByTime(eventCount * delay);
     const finalTable = controller.getSnapshot().table;
     const cardsDealt = controller.getSnapshot().visibleCardsDealt;
+    expect(controller.getSnapshot().activeHandId).toBeNull();
+    const output = playRound.mock.results[0].value;
+    expect(finalTable.dealer.status).toBe(output.dealer.status);
+    expect(finalTable.seats.map((hands) => hands.map((hand) => hand.status)))
+      .toEqual(output.seats.map((hands: { status: string }[]) => hands.map((hand) => hand.status)));
 
     vi.advanceTimersByTime(delay + 999);
     expect(controller.getSnapshot().table).toEqual(finalTable);
