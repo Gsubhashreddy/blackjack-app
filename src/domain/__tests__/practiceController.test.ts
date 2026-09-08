@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PracticeController } from '../practiceController';
 import type { Card } from '../cards';
 import type { RoundEvent } from '../gameEngine';
+import * as gameEngine from '../gameEngine';
 import type { RunningCountSettings } from '../session';
+import { speedToDelayMs } from '../session';
 
 function settings(overrides: Partial<RunningCountSettings> = {}): RunningCountSettings {
   return {
@@ -22,19 +24,80 @@ describe('PracticeController', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.useRealTimers();
   });
 
   function drive(controller: PracticeController, maxSteps = 2000) {
-    // Advances fake timers step by step until the controller stops changing
-    // on its own (i.e. it is waiting for pause/resume or a user answer).
+    // A round-end delay can leave the snapshot unchanged while timers are still pending.
     for (let i = 0; i < maxSteps; i += 1) {
-      const before = JSON.stringify(controller.getSnapshot());
+      if (controller.getSnapshot().phase !== 'dealing') break;
       vi.advanceTimersByTime(300);
-      const after = JSON.stringify(controller.getSnapshot());
-      if (before === after) break;
     }
   }
+
+  it.each([1, 10])('holds the final cards for an extra second at speed %i before the next round', (speed) => {
+    const playRound = vi.spyOn(gameEngine, 'playRound');
+    const controller = new PracticeController(settings({ speed, askEveryRounds: 10, seatCount: 1 }), () => {});
+    controller.start();
+    const delay = speedToDelayMs(speed);
+    const eventCount = playRound.mock.results[0].value.events.length;
+    vi.advanceTimersByTime(eventCount * delay);
+    const finalTable = controller.getSnapshot().table;
+    const cardsDealt = controller.getSnapshot().visibleCardsDealt;
+    expect(controller.getSnapshot().activeHandId).toBeNull();
+    const output = playRound.mock.results[0].value;
+    expect(finalTable.dealer.status).toBe(output.dealer.status);
+    expect(finalTable.seats.map((hands) => hands.map((hand) => hand.status)))
+      .toEqual(output.seats.map((hands: { status: string }[]) => hands.map((hand) => hand.status)));
+
+    vi.advanceTimersByTime(delay + 999);
+    expect(controller.getSnapshot().table).toEqual(finalTable);
+    expect(controller.getSnapshot().visibleCardsDealt).toBe(cardsDealt);
+    expect(controller.getSnapshot().roundsCompleted).toBe(0);
+    expect(playRound).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(1);
+    expect(controller.getSnapshot().roundsCompleted).toBe(1);
+    expect(playRound).toHaveBeenCalledTimes(2);
+    expect(controller.getSnapshot().table.dealer.cards).toHaveLength(0);
+    vi.advanceTimersByTime(delay - 1);
+    expect(controller.getSnapshot().visibleCardsDealt).toBe(cardsDealt);
+    vi.advanceTimersByTime(1);
+    expect(controller.getSnapshot().visibleCardsDealt).toBe(cardsDealt + 1);
+    controller.destroy();
+  });
+
+  it('waits the extra second before showing a round-boundary count prompt', () => {
+    const playRound = vi.spyOn(gameEngine, 'playRound');
+    const controller = new PracticeController(settings({ seatCount: 1 }), () => {});
+    controller.start();
+    const delay = speedToDelayMs(10);
+    vi.advanceTimersByTime((playRound.mock.results[0].value.events.length + 1) * delay + 999);
+    expect(controller.getSnapshot().phase).toBe('dealing');
+    vi.advanceTimersByTime(1);
+    expect(controller.getSnapshot().phase).toBe('awaiting-count');
+    expect(controller.getSnapshot().roundsCompleted).toBe(1);
+    controller.destroy();
+  });
+
+  it('can pause during the extra round-end delay and resume without skipping or repeating a round', () => {
+    const playRound = vi.spyOn(gameEngine, 'playRound');
+    const controller = new PracticeController(settings({ askEveryRounds: 10, seatCount: 1 }), () => {});
+    controller.start();
+    const delay = speedToDelayMs(10);
+    vi.advanceTimersByTime((playRound.mock.results[0].value.events.length + 1) * delay + 500);
+    controller.pause();
+    const paused = controller.getSnapshot();
+    vi.advanceTimersByTime(5000);
+    expect(controller.getSnapshot()).toEqual(paused);
+    expect(playRound).toHaveBeenCalledTimes(1);
+    controller.resume();
+    vi.advanceTimersByTime(delay + 1000);
+    expect(controller.getSnapshot().roundsCompleted).toBe(1);
+    expect(playRound).toHaveBeenCalledTimes(2);
+    controller.destroy();
+  });
 
   it('starts in the dealing phase and deals cards over time', () => {
     const controller = new PracticeController(settings(), () => {});

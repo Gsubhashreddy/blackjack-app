@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { RunningCountSettings } from '../domain/session';
 import { usePracticeController } from '../hooks/usePracticeController';
+import { usePauseShortcuts } from '../hooks/usePauseShortcuts';
 import { HandDisplay } from '../components/HandDisplay';
 import { CountPrompt } from '../components/CountPrompt';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -55,6 +56,7 @@ export function PracticeTable({ settings, onEnd }: PracticeTableProps) {
     showTableWhilePaused: settings.showTableWhilePaused,
     showTableDuringPrompt: settings.showTableDuringPrompt,
   });
+  usePauseShortcuts(controller, snapshot?.phase === 'dealing' && !showTableSettings && !showResetConfirm);
 
   useEffect(() => {
     if (snapshot?.phase === 'summary' && snapshot.summary) {

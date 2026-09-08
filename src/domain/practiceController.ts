@@ -189,7 +189,8 @@ export class PracticeController {
   }
 
   private scheduleNextStep() {
-    this.cardTimer = setTimeout(() => this.stepEvent(), speedToDelayMs(this.settings.speed));
+    const roundEndDelay = this.roundEventIndex >= this.roundEvents.length ? 1000 : 0;
+    this.cardTimer = setTimeout(() => this.stepEvent(), speedToDelayMs(this.settings.speed) + roundEndDelay);
   }
 
   private stepEvent() {
@@ -203,6 +204,10 @@ export class PracticeController {
     const event = this.roundEvents[idx];
     this.roundEventIndex = idx + 1;
     this.applyEvent(event);
+    if (this.roundEventIndex === this.roundEvents.length) {
+      this.applyFinalStatuses();
+      this.activeHandId = null;
+    }
     this.scheduleNextStep();
     this.onChange();
   }
@@ -291,7 +296,6 @@ export class PracticeController {
     this.clearCardTimer();
     this.freezeElapsedClock();
     this.activeHandId = null;
-    this.applyFinalStatuses();
     this.roundsCompleted += 1;
     this.pendingCutCardEnd = output.cutCardCrossed;
 

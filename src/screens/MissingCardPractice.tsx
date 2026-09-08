@@ -3,6 +3,7 @@ import { CountPrompt } from '../components/CountPrompt';
 import { PlayingCard } from '../components/PlayingCard';
 import type { HiLoGuess, MissingCardResult, MissingCardSettings } from '../domain/missingCardController';
 import { useMissingCardController } from '../hooks/useMissingCardController';
+import { usePauseShortcuts } from '../hooks/usePauseShortcuts';
 
 export interface MissingCardPracticeProps {
   settings: MissingCardSettings;
@@ -18,6 +19,7 @@ const GUESS_OPTIONS: { value: HiLoGuess; label: string; description: string }[] 
 export function MissingCardPractice({ settings, onEnd }: MissingCardPracticeProps) {
   const { snapshot, controller } = useMissingCardController(settings);
   const [showCountPrompt, setShowCountPrompt] = useState(false);
+  usePauseShortcuts(controller, snapshot?.phase === 'dealing');
 
   useEffect(() => {
     if (snapshot?.phase === 'result' && snapshot.result) {
