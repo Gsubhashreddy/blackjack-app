@@ -189,7 +189,8 @@ export class PracticeController {
   }
 
   private scheduleNextStep() {
-    this.cardTimer = setTimeout(() => this.stepEvent(), speedToDelayMs(this.settings.speed));
+    const roundEndDelay = this.roundEventIndex >= this.roundEvents.length ? 1000 : 0;
+    this.cardTimer = setTimeout(() => this.stepEvent(), speedToDelayMs(this.settings.speed) + roundEndDelay);
   }
 
   private stepEvent() {
