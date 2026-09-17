@@ -190,6 +190,26 @@ input[type='checkbox'] {
   color: var(--text);
 }
 
+.segment:has(input[type='radio']) {
+  position: relative;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  text-align: center;
+}
+
+.segment input[type='radio'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.segment:has(input[type='radio']:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
 .segment-active {
   background: var(--accent-dark);
   border-color: var(--accent);

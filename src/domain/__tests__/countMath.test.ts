@@ -46,7 +46,7 @@ describe('Count Math', () => {
     const question = createCountMathQuestion(
       {
         ...DEFAULT_COUNT_MATH_SETTINGS,
-        startingCountRange: 10,
+        maxStartingCount: 10,
         transitionMode: 'positive-to-negative',
       },
       3,

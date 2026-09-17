@@ -39,14 +39,14 @@ export function CountMathSetup({ onStart, onBack }: CountMathSetupProps) {
       <p className="subtitle">Practice changing direction around zero without losing the count.</p>
 
       <label className="field">
-        <span>Starting count range: −{settings.startingCountRange} to +{settings.startingCountRange}</span>
+        <span>Starting count range: −{settings.maxStartingCount} to +{settings.maxStartingCount}</span>
         <input
           type="range"
           min={1}
           max={10}
           step={1}
-          value={settings.startingCountRange}
-          onChange={(event) => update('startingCountRange', Number(event.target.value))}
+          value={settings.maxStartingCount}
+          onChange={(event) => update('maxStartingCount', Number(event.target.value))}
         />
       </label>
 
@@ -66,16 +66,19 @@ export function CountMathSetup({ onStart, onBack }: CountMathSetupProps) {
         <legend>Transition practice</legend>
         <div className="segmented" role="radiogroup" aria-label="Transition practice">
           {TRANSITIONS.map((option) => (
-            <button
+            <label
               key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={settings.transitionMode === option.value}
               className={settings.transitionMode === option.value ? 'segment segment-active' : 'segment'}
-              onClick={() => update('transitionMode', option.value)}
             >
-              {option.label}
-            </button>
+              <input
+                type="radio"
+                name="count-math-transition"
+                value={option.value}
+                checked={settings.transitionMode === option.value}
+                onChange={() => update('transitionMode', option.value)}
+              />
+              <span>{option.label}</span>
+            </label>
           ))}
         </div>
       </fieldset>
@@ -84,16 +87,19 @@ export function CountMathSetup({ onStart, onBack }: CountMathSetupProps) {
         <legend>Question display</legend>
         <div className="segmented" role="radiogroup" aria-label="Question display">
           {DISPLAYS.map((option) => (
-            <button
+            <label
               key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={settings.displayMode === option.value}
               className={settings.displayMode === option.value ? 'segment segment-active' : 'segment'}
-              onClick={() => update('displayMode', option.value)}
             >
-              {option.label}
-            </button>
+              <input
+                type="radio"
+                name="count-math-display"
+                value={option.value}
+                checked={settings.displayMode === option.value}
+                onChange={() => update('displayMode', option.value)}
+              />
+              <span>{option.label}</span>
+            </label>
           ))}
         </div>
       </fieldset>
@@ -102,16 +108,19 @@ export function CountMathSetup({ onStart, onBack }: CountMathSetupProps) {
         <legend>Time per question</legend>
         <div className="segmented" role="radiogroup" aria-label="Time per question">
           {TIMERS.map((seconds) => (
-            <button
+            <label
               key={seconds}
-              type="button"
-              role="radio"
-              aria-checked={settings.timerSeconds === seconds}
               className={settings.timerSeconds === seconds ? 'segment segment-active' : 'segment'}
-              onClick={() => update('timerSeconds', seconds)}
             >
-              {seconds === 0 ? 'Off' : `${seconds}s`}
-            </button>
+              <input
+                type="radio"
+                name="count-math-timer"
+                value={seconds}
+                checked={settings.timerSeconds === seconds}
+                onChange={() => update('timerSeconds', seconds)}
+              />
+              <span>{seconds === 0 ? 'Off' : `${seconds}s`}</span>
+            </label>
           ))}
         </div>
       </fieldset>

@@ -6,7 +6,7 @@ export type CountMathDisplayMode = 'cards' | 'values';
 export type CountMathTimerSeconds = 0 | 5 | 10 | 15;
 
 export interface CountMathSettings {
-  startingCountRange: number;
+  maxStartingCount: number;
   cardCount: number;
   transitionMode: CountMathTransitionMode;
   displayMode: CountMathDisplayMode;
@@ -15,7 +15,7 @@ export interface CountMathSettings {
 }
 
 export const DEFAULT_COUNT_MATH_SETTINGS: CountMathSettings = {
-  startingCountRange: 5,
+  maxStartingCount: 5,
   cardCount: 5,
   transitionMode: 'mixed',
   displayMode: 'cards',
@@ -97,7 +97,7 @@ export function createCountMathQuestion(
 ): CountMathQuestion {
   const safeCardCount = Math.max(1, Math.min(10, Math.round(cardCount)));
   const transition = chooseTransition(settings.transitionMode, rng);
-  const configuredMaximum = Math.max(1, Math.round(settings.startingCountRange));
+  const configuredMaximum = Math.max(1, Math.round(settings.maxStartingCount));
   const shouldCrossZero = safeCardCount > 1 && rng() < 0.8;
   const maximumStart = shouldCrossZero
     ? Math.min(configuredMaximum, safeCardCount - 1)
