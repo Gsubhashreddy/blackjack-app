@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { PlayingCard } from '../components/PlayingCard';
 import {
   createCountMathQuestion,
@@ -57,7 +57,7 @@ export function CountMathPractice({ settings, onHome }: CountMathPracticeProps) 
     };
   }, [feedback, question, settings.timerSeconds]);
 
-  function submitAnswer(event: React.FormEvent) {
+  function submitAnswer(event: FormEvent) {
     event.preventDefault();
     if (feedback || answer.trim() === '') return;
     const userAnswer = Number(answer);
