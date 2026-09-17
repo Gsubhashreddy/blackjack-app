@@ -64,7 +64,7 @@ export function CountMathSetup({ onStart, onBack }: CountMathSetupProps) {
 
       <fieldset className="field">
         <legend>Transition practice</legend>
-        <div className="segmented">
+        <div className="segmented" role="radiogroup" aria-label="Transition practice">
           {TRANSITIONS.map((option) => (
             <button
               key={option.value}
@@ -82,7 +82,7 @@ export function CountMathSetup({ onStart, onBack }: CountMathSetupProps) {
 
       <fieldset className="field">
         <legend>Question display</legend>
-        <div className="segmented">
+        <div className="segmented" role="radiogroup" aria-label="Question display">
           {DISPLAYS.map((option) => (
             <button
               key={option.value}
@@ -100,7 +100,7 @@ export function CountMathSetup({ onStart, onBack }: CountMathSetupProps) {
 
       <fieldset className="field">
         <legend>Time per question</legend>
-        <div className="segmented">
+        <div className="segmented" role="radiogroup" aria-label="Time per question">
           {TIMERS.map((seconds) => (
             <button
               key={seconds}

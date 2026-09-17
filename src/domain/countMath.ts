@@ -75,10 +75,13 @@ function buildValues(
   const awayFromZero = -towardZero as -1 | 1;
   const values: (-1 | 0 | 1)[] = [];
 
+  // When space permits, briefly reverse direction before supplying enough
+  // cards to cross zero. This targets the difficult mental sign change.
   if (cardCount >= startingMagnitude + 3) {
     values.push(towardZero, awayFromZero);
     for (let index = 0; index < startingMagnitude + 1; index += 1) values.push(towardZero);
   } else {
+    // Short questions move toward zero and cross it whenever enough cards fit.
     const movementCards = Math.min(cardCount, startingMagnitude + 1);
     for (let index = 0; index < movementCards; index += 1) values.push(towardZero);
   }
