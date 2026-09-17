@@ -729,6 +729,108 @@ input[type='checkbox'] {
   font-size: 0.75rem;
 }
 
+/* Count Math */
+.count-math-screen {
+  max-width: 720px;
+}
+
+.count-math-header,
+.count-math-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.count-math-stats {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.count-math-question {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  border: 4px solid #06331f;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at top, var(--felt) 0%, var(--felt-dark) 100%);
+  text-align: center;
+}
+
+.count-math-question p {
+  margin: 0;
+}
+
+.starting-count {
+  font-size: 2.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.count-math-cards,
+.count-math-values {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.count-math-values span {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.count-math-answer,
+.count-math-feedback {
+  display: grid;
+  gap: 14px;
+}
+
+.count-math-answer p,
+.count-math-feedback p,
+.count-math-feedback h2 {
+  margin: 0;
+}
+
+.count-math-timer {
+  color: #fde68a;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.count-progression {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.count-progression li {
+  position: relative;
+  min-width: 24px;
+  font-weight: 700;
+}
+
+.count-progression li + li::before {
+  content: '→';
+  position: absolute;
+  left: -18px;
+  color: var(--text-dim);
+}
+
 /* Modal */
 .modal-overlay {
   position: fixed;
