@@ -94,9 +94,11 @@ export function createCountMathQuestion(
 ): CountMathQuestion {
   const safeCardCount = Math.max(1, Math.min(10, Math.round(cardCount)));
   const transition = chooseTransition(settings.transitionMode, rng);
-  const maximumStart = safeCardCount === 1
-    ? 1
-    : Math.min(Math.max(1, Math.round(settings.startingCountRange)), safeCardCount - 1);
+  const configuredMaximum = Math.max(1, Math.round(settings.startingCountRange));
+  const shouldCrossZero = safeCardCount > 1 && rng() < 0.8;
+  const maximumStart = shouldCrossZero
+    ? Math.min(configuredMaximum, safeCardCount - 1)
+    : configuredMaximum;
   const startingMagnitude = 1 + Math.floor(rng() * maximumStart);
   const startingCount =
     transition === 'positive-to-negative' ? startingMagnitude : -startingMagnitude;

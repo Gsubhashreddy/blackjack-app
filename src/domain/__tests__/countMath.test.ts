@@ -42,6 +42,21 @@ describe('Count Math', () => {
     expect(negative.transition).toBe('negative-to-positive');
   });
 
+  it('occasionally uses the full configured starting range when crossing is impossible', () => {
+    const question = createCountMathQuestion(
+      {
+        ...DEFAULT_COUNT_MATH_SETTINGS,
+        startingCountRange: 10,
+        transitionMode: 'positive-to-negative',
+      },
+      3,
+      () => 0.99,
+    );
+
+    expect(question.startingCount).toBe(10);
+    expect(question.answer).toBe(7);
+  });
+
   it('tracks each transition direction separately', () => {
     let stats = createEmptyCountMathStats();
     stats = recordCountMathAnswer(stats, 'positive-to-negative', true);
