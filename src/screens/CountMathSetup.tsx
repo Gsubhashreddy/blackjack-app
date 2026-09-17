@@ -1,0 +1,142 @@
+import { useState } from 'react';
+import {
+  DEFAULT_COUNT_MATH_SETTINGS,
+  type CountMathDisplayMode,
+  type CountMathSettings,
+  type CountMathTimerSeconds,
+  type CountMathTransitionMode,
+} from '../domain/countMath';
+
+export interface CountMathSetupProps {
+  onStart: (settings: CountMathSettings) => void;
+  onBack: () => void;
+}
+
+const TRANSITIONS: { value: CountMathTransitionMode; label: string }[] = [
+  { value: 'positive-to-negative', label: '+ to −' },
+  { value: 'negative-to-positive', label: '− to +' },
+  { value: 'mixed', label: 'Mixed' },
+];
+const DISPLAYS: { value: CountMathDisplayMode; label: string }[] = [
+  { value: 'cards', label: 'Cards' },
+  { value: 'values', label: 'Hi-Lo values' },
+];
+const TIMERS: CountMathTimerSeconds[] = [0, 5, 10, 15];
+
+export function CountMathSetup({ onStart, onBack }: CountMathSetupProps) {
+  const [settings, setSettings] = useState(DEFAULT_COUNT_MATH_SETTINGS);
+
+  function update<K extends keyof CountMathSettings>(key: K, value: CountMathSettings[K]) {
+    setSettings((current) => ({ ...current, [key]: value }));
+  }
+
+  return (
+    <main className="screen setup-screen">
+      <button type="button" className="link-button back-button" onClick={onBack}>
+        ← Back
+      </button>
+      <h1>Count Math Setup</h1>
+      <p className="subtitle">Practice changing direction around zero without losing the count.</p>
+
+      <label className="field">
+        <span>Starting count range: −{settings.maxStartingCount} to +{settings.maxStartingCount}</span>
+        <input
+          type="range"
+          min={1}
+          max={10}
+          step={1}
+          value={settings.maxStartingCount}
+          onChange={(event) => update('maxStartingCount', Number(event.target.value))}
+        />
+      </label>
+
+      <label className="field">
+        <span>Cards per question: up to {settings.cardCount}</span>
+        <input
+          type="range"
+          min={1}
+          max={5}
+          step={1}
+          value={settings.cardCount}
+          onChange={(event) => update('cardCount', Number(event.target.value))}
+        />
+      </label>
+
+      <fieldset className="field">
+        <legend>Transition practice</legend>
+        <div className="segmented" role="radiogroup" aria-label="Transition practice">
+          {TRANSITIONS.map((option) => (
+            <label
+              key={option.value}
+              className={settings.transitionMode === option.value ? 'segment segment-active' : 'segment'}
+            >
+              <input
+                type="radio"
+                name="count-math-transition"
+                value={option.value}
+                checked={settings.transitionMode === option.value}
+                onChange={() => update('transitionMode', option.value)}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="field">
+        <legend>Question display</legend>
+        <div className="segmented" role="radiogroup" aria-label="Question display">
+          {DISPLAYS.map((option) => (
+            <label
+              key={option.value}
+              className={settings.displayMode === option.value ? 'segment segment-active' : 'segment'}
+            >
+              <input
+                type="radio"
+                name="count-math-display"
+                value={option.value}
+                checked={settings.displayMode === option.value}
+                onChange={() => update('displayMode', option.value)}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="field">
+        <legend>Time per question</legend>
+        <div className="segmented" role="radiogroup" aria-label="Time per question">
+          {TIMERS.map((seconds) => (
+            <label
+              key={seconds}
+              className={settings.timerSeconds === seconds ? 'segment segment-active' : 'segment'}
+            >
+              <input
+                type="radio"
+                name="count-math-timer"
+                value={seconds}
+                checked={settings.timerSeconds === seconds}
+                onChange={() => update('timerSeconds', seconds)}
+              />
+              <span>{seconds === 0 ? 'Off' : `${seconds}s`}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <label className="field field-toggle">
+        <span>Increase from 1 card to the selected maximum</span>
+        <input
+          type="checkbox"
+          checked={settings.progressive}
+          onChange={(event) => update('progressive', event.target.checked)}
+        />
+      </label>
+
+      <button type="button" className="primary-button" onClick={() => onStart(settings)}>
+        Start Count Math
+      </button>
+    </main>
+  );
+}

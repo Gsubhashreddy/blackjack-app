@@ -2,7 +2,7 @@
 
 A mobile-first Progressive Web App (PWA) for practicing Blackjack card
 counting with the standard Hi-Lo system. It includes **Running Count
-Practice** and a **Missing Card** drill. **True Count** and **Basic Strategy
+Practice**, **Count Math**, and a **Missing Card** drill. **True Count** and **Basic Strategy
 Drills** are shown on the home screen as "Coming soon" and are not yet
 implemented.
 
@@ -26,6 +26,11 @@ implemented.
   hidden, all remaining cards appear one at a time, and you identify the
   hidden card's Hi-Lo value. The drill supports adjustable speed,
   pause/resume, early exit, and replay.
+- Build mental arithmetic speed with Count Math questions focused on positive-
+  to-negative and negative-to-positive transitions. Configure the starting
+  range, 1–5 cards, card or Hi-Lo-value display, progressive difficulty, and
+  an optional question timer. Feedback shows every intermediate count and
+  tracks accuracy separately for each direction.
 - Installable as a PWA on mobile home screens, with responsive, accessible,
   mobile-first styling.
 
