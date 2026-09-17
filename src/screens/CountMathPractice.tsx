@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { PlayingCard } from '../components/PlayingCard';
 import {
   createCountMathQuestion,
@@ -39,6 +39,7 @@ export function CountMathPractice({ settings, onHome }: CountMathPracticeProps) 
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [stats, setStats] = useState(createEmptyCountMathStats);
   const [timeRemaining, setTimeRemaining] = useState<number>(settings.timerSeconds);
+  const answerRecorded = useRef(false);
 
   useEffect(() => {
     if (settings.timerSeconds === 0 || feedback) return;
@@ -47,6 +48,8 @@ export function CountMathPractice({ settings, onHome }: CountMathPracticeProps) 
       setTimeRemaining((current) => Math.max(0, current - 1));
     }, 1000);
     const timeout = window.setTimeout(() => {
+      if (answerRecorded.current) return;
+      answerRecorded.current = true;
       setFeedback({ correct: false, userAnswer: null });
       setStats((current) => recordCountMathAnswer(current, question.transition, false));
     }, settings.timerSeconds * 1000);
@@ -59,9 +62,10 @@ export function CountMathPractice({ settings, onHome }: CountMathPracticeProps) 
 
   function submitAnswer(event: FormEvent) {
     event.preventDefault();
-    if (feedback || answer.trim() === '') return;
+    if (answerRecorded.current || answer.trim() === '') return;
     const userAnswer = Number(answer);
     if (!Number.isInteger(userAnswer)) return;
+    answerRecorded.current = true;
     const correct = userAnswer === question.answer;
     setFeedback({ correct, userAnswer });
     setStats((current) => recordCountMathAnswer(current, question.transition, correct));
@@ -75,6 +79,7 @@ export function CountMathPractice({ settings, onHome }: CountMathPracticeProps) 
     setQuestionNumber(nextNumber);
     setQuestion(createCountMathQuestion(settings, cardCount));
     setAnswer('');
+    answerRecorded.current = false;
     setFeedback(null);
     setTimeRemaining(settings.timerSeconds);
   }

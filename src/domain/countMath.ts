@@ -45,6 +45,9 @@ const NEGATIVE_RANKS: Rank[] = ['10', 'J', 'Q', 'K', 'A'];
 const POSITIVE_RANKS: Rank[] = ['2', '3', '4', '5', '6'];
 const NEUTRAL_RANKS: Rank[] = ['7', '8', '9'];
 const SUITS: Suit[] = ['clubs', 'diamonds', 'hearts', 'spades'];
+// Crossing after one away-from-zero card requires the starting magnitude,
+// the crossing card, and the extra card that cancels that reversal.
+const OSCILLATION_CARD_BUFFER = 3;
 
 let questionId = 0;
 
@@ -77,7 +80,7 @@ function buildValues(
 
   // When space permits, briefly reverse direction before supplying enough
   // cards to cross zero. This targets the difficult mental sign change.
-  if (cardCount >= startingMagnitude + 3) {
+  if (cardCount >= startingMagnitude + OSCILLATION_CARD_BUFFER) {
     values.push(towardZero, awayFromZero);
     for (let index = 0; index < startingMagnitude + 1; index += 1) values.push(towardZero);
   } else {
