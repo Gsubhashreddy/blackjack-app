@@ -22,7 +22,7 @@ describe('Count Math flow', () => {
     await user.click(screen.getByRole('button', { name: 'Start Count Math' }));
 
     expect(screen.getByText('Starting count')).toBeInTheDocument();
-    expect(screen.getByText('+1')).toBeInTheDocument();
+    expect(screen.getAllByText('+1')).toHaveLength(2);
     expect(screen.getAllByText('−1')).toHaveLength(3);
 
     await user.type(screen.getByLabelText('Resulting count'), '-1');

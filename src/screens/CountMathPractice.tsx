@@ -38,12 +38,11 @@ export function CountMathPractice({ settings, onHome }: CountMathPracticeProps) 
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [stats, setStats] = useState(createEmptyCountMathStats);
-  const [timeRemaining, setTimeRemaining] = useState(settings.timerSeconds);
+  const [timeRemaining, setTimeRemaining] = useState<number>(settings.timerSeconds);
 
   useEffect(() => {
     if (settings.timerSeconds === 0 || feedback) return;
 
-    setTimeRemaining(settings.timerSeconds);
     const interval = window.setInterval(() => {
       setTimeRemaining((current) => Math.max(0, current - 1));
     }, 1000);
