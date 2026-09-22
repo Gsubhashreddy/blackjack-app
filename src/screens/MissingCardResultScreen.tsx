@@ -11,6 +11,16 @@ function formatValue(value: HiLoGuess): string {
   return value > 0 ? '+1' : value < 0 ? '−1' : '0';
 }
 
+/** Formats active drill time (pauses excluded), e.g. `45s` or `2m 05s`. */
+export function formatDuration(totalMs: number): string {
+  const safeMs = Math.max(0, Math.round(totalMs));
+  const totalSeconds = Math.round(safeMs / 1000);
+  if (totalSeconds < 60) return `${totalSeconds}s`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+}
+
 export function MissingCardResultScreen({ result, onReplay, onHome }: MissingCardResultScreenProps) {
   return (
     <main className="screen summary-screen">
@@ -42,6 +52,10 @@ export function MissingCardResultScreen({ result, onReplay, onHome }: MissingCar
           <strong>
             {result.cardsDealt} / {result.cardsToDeal}
           </strong>
+        </li>
+        <li>
+          <span>Time taken (excluding pauses)</span>
+          <strong>{formatDuration(result.activeMs)}</strong>
         </li>
         <li>
           <span>Decks</span>
