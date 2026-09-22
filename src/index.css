@@ -967,11 +967,26 @@ input[type='checkbox'] {
 }
 
 .card-tray {
+  --tray-w: 150px;
+  --tray-d: 104px;
+  --tray-h: 140px;
+  --stack-w: 134px;
+  --stack-d: 92px;
+  --tray-zoom: 1.45;
   margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+}
+
+.card-tray-small {
+  --tray-w: 86px;
+  --tray-d: 60px;
+  --tray-h: 80px;
+  --stack-w: 76px;
+  --stack-d: 52px;
+  --tray-zoom: 1.3;
 }
 
 .card-tray figcaption {
@@ -980,56 +995,170 @@ input[type='checkbox'] {
 }
 
 .card-tray-viewport {
-  display: flex;
-  justify-content: center;
   transition: transform 150ms ease;
-  transform-origin: center center;
 }
 
-.card-tray-body {
+.card-tray-scene {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  min-width: 120px;
-  max-width: 100%;
-  padding: 6px;
-  border: 2px solid #3f2d1c;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #24303f 0%, #161f2b 100%);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55);
-  overflow: hidden;
+  justify-content: center;
+  width: calc(var(--tray-w) + var(--tray-d));
+  height: calc(var(--tray-h) * 1.35);
+  perspective: 900px;
+}
+
+.card-tray-box {
+  position: relative;
+  width: var(--tray-w);
+  height: var(--tray-h);
+  transform-style: preserve-3d;
+  transition: transform 260ms ease;
+}
+
+.tray-face,
+.stack-face {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+
+/* Clear plastic walls of the discard tray. */
+.tray-wall {
+  border: 1px solid rgba(226, 244, 255, 0.55);
+  background: linear-gradient(
+    160deg,
+    rgba(222, 244, 255, 0.24) 0%,
+    rgba(186, 222, 240, 0.12) 45%,
+    rgba(222, 244, 255, 0.2) 100%
+  );
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.22);
+}
+
+.tray-wall-front,
+.tray-wall-back {
+  width: var(--tray-w);
+  height: var(--tray-h);
+}
+
+.tray-wall-front {
+  transform: translate(-50%, -50%) translateZ(calc(var(--tray-d) / 2));
+}
+
+.tray-wall-back {
+  transform: translate(-50%, -50%) translateZ(calc(var(--tray-d) / -2));
+}
+
+.tray-wall-left,
+.tray-wall-right {
+  width: var(--tray-d);
+  height: var(--tray-h);
+}
+
+.tray-wall-left {
+  transform: translate(-50%, -50%) rotateY(-90deg) translateZ(calc(var(--tray-w) / 2));
+}
+
+.tray-wall-right {
+  transform: translate(-50%, -50%) rotateY(90deg) translateZ(calc(var(--tray-w) / 2));
+}
+
+/* Black plastic base the tray sits on. */
+.tray-bottom {
+  width: var(--tray-w);
+  height: var(--tray-d);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #24262b 0%, #0b0c0f 100%);
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.6);
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--tray-h) / -2));
 }
 
 .card-tray-stack {
-  height: 64px;
-  border-radius: 2px;
+  --stack-height: 1px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--stack-w);
+  height: var(--stack-height);
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%)
+    translateY(calc((var(--tray-h) - var(--stack-height)) / 2 - 3px));
+  transition: height 200ms ease;
+}
+
+.stack-front,
+.stack-back {
+  width: var(--stack-w);
+  height: var(--stack-height);
+}
+
+.stack-left,
+.stack-right {
+  width: var(--stack-d);
+  height: var(--stack-height);
+}
+
+/* Stacked card edges: one stripe per card so a zoomed tray stays countable. */
+.stack-front,
+.stack-back,
+.stack-left,
+.stack-right {
   background-image: repeating-linear-gradient(
-    to right,
-    #f8fafc 0,
-    #f8fafc 0.75px,
-    #94a3b8 0.75px,
-    #94a3b8 1.15px
+    to bottom,
+    #fdfdfb 0,
+    #fdfdfb calc(var(--card-thickness) * 0.65),
+    #a8a29e calc(var(--card-thickness) * 0.65),
+    #a8a29e var(--card-thickness)
   );
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  background-color: #f5f5f4;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.35);
 }
 
-.card-tray-small .card-tray-stack {
-  height: 36px;
+.stack-front {
+  transform: translate(-50%, -50%) translateZ(calc(var(--stack-d) / 2));
 }
 
-.card-tray-small .card-tray-body {
-  min-width: 80px;
-  padding: 4px;
+.stack-back {
+  transform: translate(-50%, -50%) translateZ(calc(var(--stack-d) / -2));
 }
 
-.card-tray-zoomable {
+.stack-left {
+  transform: translate(-50%, -50%) rotateY(-90deg) translateZ(calc(var(--stack-w) / 2));
+}
+
+.stack-right {
+  transform: translate(-50%, -50%) rotateY(90deg) translateZ(calc(var(--stack-w) / 2));
+}
+
+/* Blue card back on the top of the stack. */
+.stack-top {
+  width: var(--stack-w);
+  height: var(--stack-d);
+  background-color: #eef2ff;
+  background-image:
+    repeating-linear-gradient(45deg, #3730a3 0, #3730a3 1px, transparent 1px, transparent 4px),
+    repeating-linear-gradient(-45deg, #4f46e5 0, #4f46e5 1px, transparent 1px, transparent 4px);
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--stack-height) / 2));
+}
+
+.card-tray-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.card-tray-rotate {
+  min-width: 96px;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.card-tray-zoomable .card-tray-viewport {
   cursor: zoom-in;
 }
 
-.card-tray-zoomable:hover .card-tray-viewport,
-.card-tray-zoomable:focus-visible .card-tray-viewport,
-.card-tray-zoomable:focus .card-tray-viewport {
-  transform: scale(1.5);
+.card-tray-zoomable .card-tray-viewport:hover,
+.card-tray-zoomable .card-tray-viewport:focus-visible,
+.card-tray-zoomable .card-tray-viewport:focus {
+  transform: scale(var(--tray-zoom));
 }
 
 .deck-estimation-table {

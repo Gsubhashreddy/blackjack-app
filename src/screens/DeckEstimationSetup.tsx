@@ -32,7 +32,8 @@ export function DeckEstimationSetup({ onStart, onBack }: DeckEstimationSetupProp
       </button>
       <h1>Deck Estimation Setup</h1>
       <p className="subtitle">
-        Judge how many decks sit in the tray. Hover or focus a tray to magnify it.
+        Judge how many decks sit in the tray. Hover or focus a tray to magnify it, and use the
+        arrows to rotate it.
       </p>
 
       <fieldset className="field">
