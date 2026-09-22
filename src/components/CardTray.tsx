@@ -12,6 +12,9 @@ export const ROTATION_STEP_DEG = 30;
 /** Starting three-quarter view, matching how a discard tray sits on a table. */
 const DEFAULT_ROTATION_DEG = -24;
 
+/** Downward tilt, as if looking at a tray standing on the table in front of you. */
+const TILT_DEG = -14;
+
 export interface CardTrayProps {
   /** Number of physical cards sitting in the tray. */
   cardCount: number;
@@ -41,7 +44,7 @@ export function CardTray({
   const [rotation, setRotation] = useState(DEFAULT_ROTATION_DEG);
 
   const thickness = CARD_THICKNESS_PX[size];
-  const stackHeightPx = Math.max(thickness, cardCount * thickness);
+  const stackHeightPx = Math.max(0, cardCount) * thickness;
   const classNames = ['card-tray', `card-tray-${size}`, zoomable ? 'card-tray-zoomable' : '']
     .filter(Boolean)
     .join(' ');
@@ -58,22 +61,24 @@ export function CardTray({
         <div className="card-tray-scene">
           <div
             className="card-tray-box"
-            style={{ transform: `rotateX(-14deg) rotateY(${rotation}deg)` }}
+            style={{ transform: `rotateX(${TILT_DEG}deg) rotateY(${rotation}deg)` }}
           >
             <div className="tray-face tray-wall tray-wall-back" />
             <div className="tray-face tray-wall tray-wall-left" />
             <div className="tray-face tray-wall tray-wall-right" />
             <div className="tray-face tray-bottom" />
-            <div
-              className="card-tray-stack"
-              style={{ '--stack-height': `${stackHeightPx}px` } as CSSProperties}
-            >
-              <div className="stack-face stack-top" />
-              <div className="stack-face stack-front" />
-              <div className="stack-face stack-back" />
-              <div className="stack-face stack-left" />
-              <div className="stack-face stack-right" />
-            </div>
+            {stackHeightPx > 0 && (
+              <div
+                className="card-tray-stack"
+                style={{ '--stack-height': `${stackHeightPx}px` } as CSSProperties}
+              >
+                <div className="stack-face stack-top" />
+                <div className="stack-face stack-front" />
+                <div className="stack-face stack-back" />
+                <div className="stack-face stack-left" />
+                <div className="stack-face stack-right" />
+              </div>
+            )}
             <div className="tray-face tray-wall tray-wall-front" />
           </div>
         </div>
