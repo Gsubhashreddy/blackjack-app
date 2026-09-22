@@ -11,6 +11,9 @@ import type { MissingCardResult, MissingCardSettings } from './domain/missingCar
 import { CountMathSetup } from './screens/CountMathSetup';
 import { CountMathPractice } from './screens/CountMathPractice';
 import type { CountMathSettings } from './domain/countMath';
+import { DeckEstimationSetup } from './screens/DeckEstimationSetup';
+import { DeckEstimationPractice } from './screens/DeckEstimationPractice';
+import type { DeckEstimationSettings } from './domain/deckEstimation';
 
 type Route =
   | { screen: 'home' }
@@ -21,7 +24,9 @@ type Route =
   | { screen: 'missing-practice'; settings: MissingCardSettings; key: number }
   | { screen: 'missing-result'; settings: MissingCardSettings; result: MissingCardResult }
   | { screen: 'count-math-setup' }
-  | { screen: 'count-math-practice'; settings: CountMathSettings; key: number };
+  | { screen: 'count-math-practice'; settings: CountMathSettings; key: number }
+  | { screen: 'deck-estimation-setup' }
+  | { screen: 'deck-estimation-practice'; settings: DeckEstimationSettings; key: number };
 
 function App() {
   const [route, setRoute] = useState<Route>({ screen: 'home' });
@@ -32,6 +37,7 @@ function App() {
         onSelectRunningCount={() => setRoute({ screen: 'running-setup' })}
         onSelectMissingCard={() => setRoute({ screen: 'missing-setup' })}
         onSelectCountMath={() => setRoute({ screen: 'count-math-setup' })}
+        onSelectDeckEstimation={() => setRoute({ screen: 'deck-estimation-setup' })}
       />
     );
   }
@@ -105,7 +111,24 @@ function App() {
     );
   }
 
-  return <CountMathPractice key={route.key} settings={route.settings} onHome={() => setRoute({ screen: 'home' })} />;
+  if (route.screen === 'count-math-practice') {
+    return (
+      <CountMathPractice key={route.key} settings={route.settings} onHome={() => setRoute({ screen: 'home' })} />
+    );
+  }
+
+  if (route.screen === 'deck-estimation-setup') {
+    return (
+      <DeckEstimationSetup
+        onStart={(settings) => setRoute({ screen: 'deck-estimation-practice', settings, key: Date.now() })}
+        onBack={() => setRoute({ screen: 'home' })}
+      />
+    );
+  }
+
+  return (
+    <DeckEstimationPractice key={route.key} settings={route.settings} onHome={() => setRoute({ screen: 'home' })} />
+  );
 }
 
 export default App;

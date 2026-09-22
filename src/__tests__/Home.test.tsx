@@ -4,17 +4,19 @@ import userEvent from '@testing-library/user-event';
 import { Home } from '../screens/Home';
 
 describe('Home screen', () => {
-  it('renders Running Count, Missing Card, and Count Math as enabled modes', () => {
+  it('renders Running Count, Missing Card, Count Math, and Deck Estimation as enabled modes', () => {
     render(
       <Home
         onSelectRunningCount={() => {}}
         onSelectMissingCard={() => {}}
         onSelectCountMath={() => {}}
+        onSelectDeckEstimation={() => {}}
       />,
     );
     expect(screen.getByRole('button', { name: /Running Count/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Missing Card/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Count Math/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Deck Estimation/i })).toBeInTheDocument();
     expect(screen.getByText('True Count')).toBeInTheDocument();
     expect(screen.getByText('Basic Strategy')).toBeInTheDocument();
     const comingSoon = screen.getAllByText('Coming soon');
@@ -29,6 +31,7 @@ describe('Home screen', () => {
         onSelectRunningCount={() => (clicked = true)}
         onSelectMissingCard={() => {}}
         onSelectCountMath={() => {}}
+        onSelectDeckEstimation={() => {}}
       />,
     );
     await user.click(screen.getByRole('button', { name: /Running Count/i }));
@@ -43,6 +46,7 @@ describe('Home screen', () => {
         onSelectRunningCount={() => {}}
         onSelectMissingCard={() => (clicked = true)}
         onSelectCountMath={() => {}}
+        onSelectDeckEstimation={() => {}}
       />,
     );
     await user.click(screen.getByRole('button', { name: /Missing Card/i }));
@@ -57,9 +61,25 @@ describe('Home screen', () => {
         onSelectRunningCount={() => {}}
         onSelectMissingCard={() => {}}
         onSelectCountMath={() => (clicked = true)}
+        onSelectDeckEstimation={() => {}}
       />,
     );
     await user.click(screen.getByRole('button', { name: /Count Math/i }));
+    expect(clicked).toBe(true);
+  });
+
+  it('invokes onSelectDeckEstimation when the Deck Estimation card is activated', async () => {
+    const user = userEvent.setup();
+    let clicked = false;
+    render(
+      <Home
+        onSelectRunningCount={() => {}}
+        onSelectMissingCard={() => {}}
+        onSelectCountMath={() => {}}
+        onSelectDeckEstimation={() => (clicked = true)}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: /Deck Estimation/i }));
     expect(clicked).toBe(true);
   });
 });

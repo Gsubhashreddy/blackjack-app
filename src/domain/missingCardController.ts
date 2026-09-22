@@ -26,6 +26,8 @@ export interface MissingCardResult {
   correctValue: HiLoGuess;
   correct: boolean | null;
   endedEarly: boolean;
+  /** Time spent dealing, excluding pauses. */
+  activeMs: number;
 }
 
 export interface MissingCardCountFeedback {
@@ -95,10 +97,19 @@ export class MissingCardController {
   private count = new RunningCount();
   private countFeedback: MissingCardCountFeedback | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
+  private readonly now: () => number;
+  private activeMs = 0;
+  private segmentStartedAt: number | null = null;
 
-  constructor(settings: MissingCardSettings, onChange: () => void, rng: Rng = Math.random) {
+  constructor(
+    settings: MissingCardSettings,
+    onChange: () => void,
+    rng: Rng = Math.random,
+    now: () => number = () => Date.now(),
+  ) {
     this.settings = settings;
     this.onChange = onChange;
+    this.now = now;
 
     const shoe: Card[] = [];
     for (let i = 0; i < settings.deckCount; i += 1) {
@@ -125,12 +136,14 @@ export class MissingCardController {
   start(): void {
     if (this.phase !== 'ready') return;
     this.phase = 'dealing';
+    this.startTiming();
     this.showNextCard();
   }
 
   pause(): void {
     if (this.phase !== 'dealing') return;
     this.clearTimer();
+    this.stopTiming();
     this.phase = 'paused';
     this.onChange();
   }
@@ -139,6 +152,7 @@ export class MissingCardController {
     if (this.phase !== 'paused') return;
     this.countFeedback = null;
     this.phase = 'dealing';
+    this.startTiming();
     this.scheduleNextCard();
     this.onChange();
   }
@@ -163,6 +177,7 @@ export class MissingCardController {
   endSession(): void {
     if (this.phase === 'result') return;
     this.clearTimer();
+    this.stopTiming();
     this.currentCard = null;
     this.result = this.buildResult(null);
     this.phase = 'result';
@@ -184,6 +199,7 @@ export class MissingCardController {
     if (this.phase !== 'dealing') return;
     if (this.cardsDealt >= this.cards.length) {
       this.currentCard = null;
+      this.stopTiming();
       this.phase = 'guessing';
       this.onChange();
       return;
@@ -215,7 +231,22 @@ export class MissingCardController {
       correctValue,
       correct: guess === null ? null : guess === correctValue,
       endedEarly: this.cardsDealt < this.cards.length,
+      activeMs: this.elapsedActiveMs(),
     };
+  }
+
+  private startTiming(): void {
+    this.segmentStartedAt = this.now();
+  }
+
+  private stopTiming(): void {
+    this.activeMs = this.elapsedActiveMs();
+    this.segmentStartedAt = null;
+  }
+
+  private elapsedActiveMs(): number {
+    if (this.segmentStartedAt === null) return this.activeMs;
+    return this.activeMs + Math.max(0, this.now() - this.segmentStartedAt);
   }
 
   private clearTimer(): void {

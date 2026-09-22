@@ -146,4 +146,25 @@ describe('MissingCardController', () => {
     expect(result.cardsDealt).toBe(1);
     expect(result.cardsToDeal).toBe(103);
   });
+
+  it('reports active time and excludes paused time', () => {
+    vi.useFakeTimers();
+    let clock = 1000;
+    const controller = new MissingCardController(
+      settings({ deckCount: 1 }),
+      () => {},
+      Math.random,
+      () => clock,
+    );
+
+    controller.start();
+    clock += 4000;
+    controller.pause();
+    clock += 60_000;
+    controller.resume();
+    clock += 2000;
+    controller.endSession();
+
+    expect(controller.getSnapshot().result!.activeMs).toBe(6000);
+  });
 });

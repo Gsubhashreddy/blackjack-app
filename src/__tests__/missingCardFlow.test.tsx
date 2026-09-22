@@ -52,6 +52,7 @@ describe('Missing Card flow', () => {
     expect(screen.getByRole('heading', { name: 'Missing Card Result' })).toBeInTheDocument();
     expect(screen.getByText(/^(Correct!|Incorrect)$/)).toBeInTheDocument();
     expect(screen.getByText('Correct Hi-Lo value')).toBeInTheDocument();
+    expect(screen.getByText('Time taken (excluding pauses)')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Replay with same settings' }));
     expect(screen.getByRole('heading', { name: 'Missing Card' })).toBeInTheDocument();
