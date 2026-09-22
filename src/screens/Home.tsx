@@ -2,9 +2,15 @@ export interface HomeProps {
   onSelectRunningCount: () => void;
   onSelectMissingCard: () => void;
   onSelectCountMath: () => void;
+  onSelectDeckEstimation: () => void;
 }
 
-export function Home({ onSelectRunningCount, onSelectMissingCard, onSelectCountMath }: HomeProps) {
+export function Home({
+  onSelectRunningCount,
+  onSelectMissingCard,
+  onSelectCountMath,
+  onSelectDeckEstimation,
+}: HomeProps) {
   return (
     <main className="screen home-screen">
       <h1>Blackjack Count Trainer</h1>
@@ -21,6 +27,10 @@ export function Home({ onSelectRunningCount, onSelectMissingCard, onSelectCountM
         <button type="button" className="mode-card mode-card-enabled" onClick={onSelectCountMath}>
           <h2>Count Math</h2>
           <p>Practice fast count changes across zero with cards or Hi-Lo values.</p>
+        </button>
+        <button type="button" className="mode-card mode-card-enabled" onClick={onSelectDeckEstimation}>
+          <h2>Deck Estimation</h2>
+          <p>Eyeball a tray of cards and call how many decks it holds.</p>
         </button>
         <div className="mode-card mode-card-disabled" role="listitem" aria-disabled="true">
           <h2>True Count</h2>

@@ -12,7 +12,7 @@ function formatValue(value: HiLoGuess): string {
 }
 
 /** Formats active drill time (pauses excluded), e.g. `45s` or `2m 05s`. */
-export function formatDuration(totalMs: number): string {
+function formatDuration(totalMs: number): string {
   const safeMs = Math.max(0, Math.round(totalMs));
   const totalSeconds = Math.round(safeMs / 1000);
   if (totalSeconds < 60) return `${totalSeconds}s`;
