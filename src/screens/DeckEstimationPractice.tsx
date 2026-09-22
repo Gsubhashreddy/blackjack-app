@@ -71,10 +71,13 @@ export function DeckEstimationPractice({ settings, onHome }: DeckEstimationPract
       </section>
 
       <section className="deck-estimation-table">
-        <p className="deck-tray-hint">Hover or focus the tray to zoom in.</p>
+        <p className="deck-tray-hint">
+          Hover or focus the tray to zoom in, and use the arrows to rotate it.
+        </p>
         <CardTray
           cardCount={question.cardCount}
           zoomable
+          rotatable
           label="Tray of cards to estimate"
           caption={grade ? formatDecks(question.decks) : undefined}
         />
