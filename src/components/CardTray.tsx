@@ -49,30 +49,33 @@ export function CardTray({
   return (
     <figure className={classNames}>
       <div
-        className="card-tray-scene"
+        className="card-tray-viewport"
         tabIndex={zoomable ? 0 : undefined}
         role="img"
         aria-label={label ?? 'Tray of cards'}
+        style={{ '--card-thickness': `${thickness}px` } as CSSProperties}
       >
-        <div
-          className="card-tray-box"
-          style={{ transform: `rotateX(-14deg) rotateY(${rotation}deg)` }}
-        >
-          <div className="tray-face tray-wall tray-wall-back" />
-          <div className="tray-face tray-wall tray-wall-left" />
-          <div className="tray-face tray-wall tray-wall-right" />
-          <div className="tray-face tray-bottom" />
+        <div className="card-tray-scene">
           <div
-            className="card-tray-stack"
-            style={{ '--stack-height': `${stackHeightPx}px` } as CSSProperties}
+            className="card-tray-box"
+            style={{ transform: `rotateX(-14deg) rotateY(${rotation}deg)` }}
           >
-            <div className="stack-face stack-top" />
-            <div className="stack-face stack-front" />
-            <div className="stack-face stack-back" />
-            <div className="stack-face stack-left" />
-            <div className="stack-face stack-right" />
+            <div className="tray-face tray-wall tray-wall-back" />
+            <div className="tray-face tray-wall tray-wall-left" />
+            <div className="tray-face tray-wall tray-wall-right" />
+            <div className="tray-face tray-bottom" />
+            <div
+              className="card-tray-stack"
+              style={{ '--stack-height': `${stackHeightPx}px` } as CSSProperties}
+            >
+              <div className="stack-face stack-top" />
+              <div className="stack-face stack-front" />
+              <div className="stack-face stack-back" />
+              <div className="stack-face stack-left" />
+              <div className="stack-face stack-right" />
+            </div>
+            <div className="tray-face tray-wall tray-wall-front" />
           </div>
-          <div className="tray-face tray-wall tray-wall-front" />
         </div>
       </div>
       {rotatable && (
@@ -83,7 +86,7 @@ export function CardTray({
             aria-label="Rotate tray left"
             onClick={() => setRotation((current) => current - ROTATION_STEP_DEG)}
           >
-            ←
+            <span aria-hidden="true">←</span>
           </button>
           <button
             type="button"
@@ -91,7 +94,7 @@ export function CardTray({
             aria-label="Rotate tray right"
             onClick={() => setRotation((current) => current + ROTATION_STEP_DEG)}
           >
-            →
+            <span aria-hidden="true">→</span>
           </button>
         </div>
       )}
